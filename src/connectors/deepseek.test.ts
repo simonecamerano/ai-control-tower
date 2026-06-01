@@ -39,7 +39,7 @@ describe('DeepSeekConnector', () => {
     expect(result.models).toHaveLength(1);
     expect(result.models[0].modelId).toBe('deepseek-balance');
     expect(result.models[0].modelName).toBe('Balance');
-    expect(result.models[0].quota).toEqual({ type: 'credits', total: 8.5, used: 0, remaining: 8.5 });
+    expect(result.models[0].quota).toEqual({ type: 'currency', total: 0, used: 0, remaining: 8.5 });
   });
 
   test('should show Balance + Monthly Spend when platform token is set', async () => {

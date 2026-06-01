@@ -1,7 +1,7 @@
 export type HealthStatus = 'OK' | 'WARNING' | 'CRITICAL' | 'BLOCKED';
 
 export interface MetricQuota {
-  type: 'tokens' | 'requests' | 'credits' | 'percent';
+  type: 'tokens' | 'requests' | 'credits' | 'percent' | 'currency';
   total: number;
   used: number;
   remaining: number;

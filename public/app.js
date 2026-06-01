@@ -256,12 +256,17 @@ function renderProviderCard(provider) {
 
   const providerClass = provider.provider ? `provider-${escapeHtml(provider.provider.toLowerCase())}` : '';
 
+  const balanceModel = models.find((m) => m.modelId === 'deepseek-balance');
+  const subtitle = balanceModel
+    ? `${escapeHtml(titleCase(provider.status ?? "unknown"))} · $${Number(balanceModel.quota.remaining).toFixed(2)} balance`
+    : `${escapeHtml(titleCase(provider.status ?? "unknown"))} · ${models.length} model${models.length === 1 ? "" : "s"}`;
+
   return `
     <article class="provider-card ${providerClass}">
       <div class="provider-title">
         <div class="provider-name">
           <h3>${escapeHtml(titleCase(provider.provider))}</h3>
-          <span>${escapeHtml(titleCase(provider.status ?? "unknown"))} · ${models.length} model${models.length === 1 ? "" : "s"}</span>
+          <span>${subtitle}</span>
         </div>
         <span class="health-badge health-${escapeHtml(health.toLowerCase())}">${escapeHtml(health)}</span>
       </div>
@@ -272,9 +277,50 @@ function renderProviderCard(provider) {
   `;
 }
 
+function formatCurrency(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return "$0.00";
+  const decimals = n >= 1 ? 2 : n < 0.01 ? 6 : 4;
+  return "$" + n.toFixed(decimals).replace(/\.?0+$/, "");
+}
+
 function renderModel(model) {
-  const percent = getQuotaPercent(model);
   const quota = model.quota ?? {};
+  const name = escapeHtml(model.modelName ?? model.modelId ?? "Unnamed model");
+
+  if (quota.type === 'currency') {
+    return `
+      <div class="model model--currency">
+        <div class="model-row">
+          <strong>${name}</strong>
+          <span class="amount-display">${escapeHtml(formatCurrency(quota.remaining))}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  if (quota.type === 'credits') {
+    const percent = getQuotaPercent(model);
+    const remaining = formatCurrency(quota.remaining);
+    const total = formatCurrency(quota.total);
+    return `
+      <div class="model">
+        <div class="model-row">
+          <strong>${name}</strong>
+          <span class="percent">${percent}%</span>
+        </div>
+        <div class="progress-track" aria-label="${escapeHtml(percent)} percent remaining">
+          <div class="progress-fill" style="--progress: ${percent}%"></div>
+        </div>
+        <div class="model-meta">
+          <span>${escapeHtml(formatFriendlyDuration(model.resetAt))}</span>
+          <span>${escapeHtml(remaining)} / ${escapeHtml(total)}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  const percent = getQuotaPercent(model);
   const used = formatNumber(quota.used ?? 0);
   const total = formatNumber(quota.total ?? 0);
   const type = quota.type ?? "quota";
@@ -282,7 +328,7 @@ function renderModel(model) {
   return `
     <div class="model">
       <div class="model-row">
-        <strong>${escapeHtml(model.modelName ?? model.modelId ?? "Unnamed model")}</strong>
+        <strong>${name}</strong>
         <span class="percent">${percent}%</span>
       </div>
       <div class="progress-track" aria-label="${escapeHtml(percent)} percent remaining">

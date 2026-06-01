@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus, ModelMetrics } from '../types';
+import { config } from '../config';
 
 /**
  * Connector for OpenAI Codex (via the ChatGPT WHAM usage endpoint).
@@ -14,7 +15,7 @@ import { ProviderMetrics, HealthStatus, ModelMetrics } from '../types';
  */
 export class CodexConnector extends BaseConnector {
   constructor() {
-    super('codex');
+    super('codex', 60000);
   }
 
   protected async fetchMetricsRaw(): Promise<ProviderMetrics> {
@@ -61,9 +62,23 @@ export class CodexConnector extends BaseConnector {
         headers['ChatGPT-Account-Id'] = accountId;
       }
 
-      const response = await fetch('https://chatgpt.com/backend-api/wham/usage', {
-        headers
-      });
+      const platformHeaders = config.CODEX_SESSION_TOKEN && config.CODEX_ORG_ID
+        ? { 'Authorization': `Bearer ${config.CODEX_SESSION_TOKEN}`, 'openai-organization': config.CODEX_ORG_ID }
+        : null;
+
+      const now_date = new Date();
+      const monthStart = `${now_date.getFullYear()}-${String(now_date.getMonth() + 1).padStart(2, '0')}-01`;
+      const tomorrow = new Date(now_date.getTime() + 86400000).toISOString().slice(0, 10);
+
+      const [response, creditsRes, usageRes] = await Promise.all([
+        fetch('https://chatgpt.com/backend-api/wham/usage', { headers }),
+        platformHeaders
+          ? fetch('https://api.openai.com/v1/dashboard/billing/credit_grants', { headers: platformHeaders })
+          : Promise.resolve(null),
+        platformHeaders
+          ? fetch(`https://api.openai.com/v1/dashboard/billing/usage?start_date=${monthStart}&end_date=${tomorrow}`, { headers: platformHeaders })
+          : Promise.resolve(null)
+      ]);
 
       if (!response.ok) {
         return {
@@ -124,6 +139,37 @@ export class CodexConnector extends BaseConnector {
             remaining: Math.max(0, 100 - secondaryUsed)
           },
           resetAt: secondaryWindow.reset_at ? new Date(secondaryWindow.reset_at * 1000).toISOString() : null
+        });
+      }
+
+      // API credit balance (platform.openai.com)
+      if (creditsRes?.ok) {
+        const creditsData = await creditsRes.json();
+        if (typeof creditsData.total_available === 'number') {
+          const expiresAt = creditsData.grants?.data?.[0]?.expires_at
+            ? new Date(creditsData.grants.data[0].expires_at * 1000).toISOString()
+            : null;
+          models.push({
+            modelId: 'codex-balance',
+            modelName: 'API Balance',
+            quota: { type: 'currency', total: 0, used: 0, remaining: creditsData.total_available },
+            resetAt: expiresAt
+          });
+        }
+      }
+
+      // Monthly spend — costs are in USD cents, divide by 100
+      if (usageRes?.ok) {
+        const usageData = await usageRes.json();
+        const dailyCosts: { line_items: { cost: number }[] }[] = usageData?.daily_costs ?? [];
+        const monthlySpend = dailyCosts
+          .flatMap(d => d.line_items ?? [])
+          .reduce((sum, item) => sum + (item.cost ?? 0), 0) / 100;
+        models.push({
+          modelId: 'codex-monthly',
+          modelName: 'Monthly Spend',
+          quota: { type: 'currency', total: 0, used: monthlySpend, remaining: monthlySpend },
+          resetAt: null
         });
       }
 

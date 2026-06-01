@@ -5,11 +5,15 @@ import { config } from '../config';
 describe('ClaudeConnector', () => {
   const originalOrgId = config.CLAUDE_ORG_ID;
   const originalSessionCookie = config.CLAUDE_SESSION_COOKIE;
+  const originalPlatformOrgId = config.CLAUDE_PLATFORM_ORG_ID;
+  const originalPlatformSessionCookie = config.CLAUDE_PLATFORM_SESSION_COOKIE;
   const originalFetch = global.fetch;
 
   afterEach(() => {
     config.CLAUDE_ORG_ID = originalOrgId;
     config.CLAUDE_SESSION_COOKIE = originalSessionCookie;
+    config.CLAUDE_PLATFORM_ORG_ID = originalPlatformOrgId;
+    config.CLAUDE_PLATFORM_SESSION_COOKIE = originalPlatformSessionCookie;
     global.fetch = originalFetch;
     vi.restoreAllMocks();
   });
@@ -22,20 +26,17 @@ describe('ClaudeConnector', () => {
     expect(result.status).toBe('inactive');
   });
 
-  test('should parse successful usage response correctly', async () => {
+  test('should parse successful usage response correctly (no platform org)', async () => {
     config.CLAUDE_ORG_ID = 'test-org';
     config.CLAUDE_SESSION_COOKIE = 'session-cookie';
+    config.CLAUDE_PLATFORM_ORG_ID = '';
 
     const mockApiResponse = {
       five_hour: { utilization: 35.0, resets_at: '2026-06-01T13:40:00.449021+00:00' },
       seven_day: { utilization: 32.0, resets_at: '2026-06-03T13:00:00.449043+00:00' }
     };
 
-    const mockFetch = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => mockApiResponse
-    });
-    global.fetch = mockFetch;
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => mockApiResponse });
 
     const connector = new ClaudeConnector();
     const result = await connector.fetchMetrics();
@@ -64,6 +65,32 @@ describe('ClaudeConnector', () => {
       remaining: 68
     });
     expect(result.models[1].resetAt).toBe('2026-06-03T13:00:00.449043+00:00');
+  });
+
+  test('should include API Balance model when CLAUDE_PLATFORM_ORG_ID is set', async () => {
+    config.CLAUDE_ORG_ID = 'test-org';
+    config.CLAUDE_SESSION_COOKIE = 'session-cookie';
+    config.CLAUDE_PLATFORM_ORG_ID = 'platform-org';
+    config.CLAUDE_PLATFORM_SESSION_COOKIE = 'platform-session';
+
+    const usageResponse = {
+      five_hour: { utilization: 35.0, resets_at: '2026-06-01T13:40:00.449021+00:00' },
+      seven_day: { utilization: 32.0, resets_at: '2026-06-03T13:00:00.449043+00:00' }
+    };
+    const creditsResponse = { amount: 481, currency: 'USD' };
+
+    global.fetch = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => usageResponse })
+      .mockResolvedValueOnce({ ok: true, json: async () => creditsResponse });
+
+    const connector = new ClaudeConnector();
+    const result = await connector.fetchMetrics();
+
+    expect(result.models).toHaveLength(3);
+    const balance = result.models.find(m => m.modelId === 'claude-api-balance');
+    expect(balance?.modelName).toBe('API Balance');
+    expect(balance?.quota.type).toBe('currency');
+    expect(balance?.quota.remaining).toBeCloseTo(4.81);
   });
 
   test('should return error status and BLOCKED health on failed response', async () => {

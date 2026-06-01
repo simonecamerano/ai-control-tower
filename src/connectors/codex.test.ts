@@ -1,6 +1,7 @@
-import { expect, test, describe, vi, afterEach } from 'vitest';
+import { expect, test, describe, vi, afterEach, beforeEach } from 'vitest';
 import * as fs from 'fs';
 import { CodexConnector } from './codex';
+import { config } from '../config';
 
 vi.mock('fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
@@ -13,8 +14,17 @@ vi.mock('fs', async (importOriginal) => {
 
 describe('CodexConnector', () => {
   const originalFetch = global.fetch;
+  const originalSessionToken = config.CODEX_SESSION_TOKEN;
+  const originalOrgId = config.CODEX_ORG_ID;
+
+  beforeEach(() => {
+    config.CODEX_SESSION_TOKEN = '';
+    config.CODEX_ORG_ID = '';
+  });
 
   afterEach(() => {
+    config.CODEX_SESSION_TOKEN = originalSessionToken;
+    config.CODEX_ORG_ID = originalOrgId;
     global.fetch = originalFetch;
     vi.restoreAllMocks();
   });

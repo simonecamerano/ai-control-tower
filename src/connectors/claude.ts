@@ -13,13 +13,11 @@ interface AnthropicUsageResponse {
   [key: string]: unknown;
 }
 
-/**
- * Connector for Anthropic Claude (console usage API).
- *
- * Queries the undocumented Anthropic console REST endpoint using a session
- * cookie. Requires `CLAUDE_ORG_ID` and `CLAUDE_SESSION_COOKIE` to be set;
- * returns `inactive` status when either is absent.
- */
+interface AnthropicCreditsResponse {
+  amount?: unknown;
+  currency?: unknown;
+}
+
 export class ClaudeConnector extends BaseConnector {
   constructor() {
     super('claude');
@@ -37,40 +35,38 @@ export class ClaudeConnector extends BaseConnector {
       };
     }
 
-    try {
-      const response = await fetch(
-        `https://claude.ai/api/organizations/${config.CLAUDE_ORG_ID}/usage`,
-        {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            Cookie: config.CLAUDE_SESSION_COOKIE,
-            // Mimic a browser UA to avoid bot-rejection from the console CDN.
-            'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-          }
-        }
-      );
+    const headers = {
+      Accept: 'application/json',
+      Cookie: config.CLAUDE_SESSION_COOKIE,
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    };
 
-      if (!response.ok) {
-        return {
-          provider: 'claude',
-          status: 'error',
-          health: 'BLOCKED',
-          models: [],
-          resetAt: null,
-          lastUpdatedAt: new Date().toISOString()
-        };
+    try {
+      const [usageRes, creditsRes] = await Promise.all([
+        fetch(`https://claude.ai/api/organizations/${config.CLAUDE_ORG_ID}/usage`, { headers }),
+        config.CLAUDE_PLATFORM_ORG_ID && config.CLAUDE_PLATFORM_SESSION_COOKIE
+          ? fetch(`https://platform.claude.com/api/organizations/${config.CLAUDE_PLATFORM_ORG_ID}/prepaid/credits`, {
+              headers: {
+                Accept: 'application/json',
+                Cookie: config.CLAUDE_PLATFORM_SESSION_COOKIE,
+                'anthropic-client-platform': 'web_console',
+                'content-type': 'application/json',
+                'User-Agent': headers['User-Agent']
+              }
+            })
+          : Promise.resolve(null)
+      ]);
+
+      if (!usageRes.ok) {
+        return { provider: 'claude', status: 'error', health: 'BLOCKED', models: [], resetAt: null, lastUpdatedAt: new Date().toISOString() };
       }
 
-      const data = (await response.json()) as AnthropicUsageResponse;
+      const data = (await usageRes.json()) as AnthropicUsageResponse;
 
       const sonnetUsed = typeof data.five_hour?.utilization === 'number' ? Math.round(data.five_hour.utilization) : 0;
       const opusUsed = typeof data.seven_day?.utilization === 'number' ? Math.round(data.seven_day.utilization) : 0;
       const sonnetRemaining = Math.max(0, 100 - sonnetUsed);
       const opusRemaining = Math.max(0, 100 - opusUsed);
-      const resetAt = typeof data.five_hour?.resets_at === 'string' ? data.five_hour.resets_at : null;
-
       const fiveHourResetAt = typeof data.five_hour?.resets_at === 'string' ? data.five_hour.resets_at : null;
       const sevenDayResetAt = typeof data.seven_day?.resets_at === 'string' ? data.seven_day.resets_at : null;
 
@@ -89,6 +85,20 @@ export class ClaudeConnector extends BaseConnector {
         }
       ];
 
+      // API prepaid balance (platform.claude.com) — amount is in cents
+      if (creditsRes?.ok) {
+        const creditsData = (await creditsRes.json()) as AnthropicCreditsResponse;
+        if (typeof creditsData.amount === 'number') {
+          const balanceDollars = creditsData.amount / 100;
+          models.push({
+            modelId: 'claude-api-balance',
+            modelName: 'API Balance',
+            quota: { type: 'currency', total: 0, used: 0, remaining: balanceDollars },
+            resetAt: null
+          });
+        }
+      }
+
       const maxUsed = Math.max(sonnetUsed, opusUsed);
       const health: HealthStatus = maxUsed >= 90 ? 'CRITICAL' : maxUsed >= 70 ? 'WARNING' : 'OK';
 
@@ -101,14 +111,7 @@ export class ClaudeConnector extends BaseConnector {
         lastUpdatedAt: new Date().toISOString()
       };
     } catch {
-      return {
-        provider: 'claude',
-        status: 'error',
-        health: 'BLOCKED',
-        models: [],
-        resetAt: null,
-        lastUpdatedAt: new Date().toISOString()
-      };
+      return { provider: 'claude', status: 'error', health: 'BLOCKED', models: [], resetAt: null, lastUpdatedAt: new Date().toISOString() };
     }
   }
 }

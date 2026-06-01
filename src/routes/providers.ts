@@ -84,7 +84,14 @@ export async function providersRoutes(fastify: FastifyInstance) {
     const candidateModels = allMetrics
       .filter(p => p.health !== 'BLOCKED')
       .flatMap(p =>
-        p.models.map(m => ({
+        p.models
+          .filter(m => {
+            if (m.quota.type !== 'currency') return true;
+            // currency models only appear when balance is low, and never for informational-only entries
+            const isAlertable = m.modelId === 'deepseek-balance';
+            return isAlertable && (p.health === 'WARNING' || p.health === 'CRITICAL');
+          })
+          .map(m => ({
           provider: p.provider,
           modelId: m.modelId,
           modelName: m.modelName,

@@ -63,8 +63,8 @@ export class DeepSeekConnector extends BaseConnector {
       const isAvailable = balanceData.is_available ?? (remaining > 0);
       let health: HealthStatus = 'OK';
       if (!isAvailable || remaining <= 0) health = 'BLOCKED';
-      else if (remaining < 1.0) health = 'CRITICAL';
-      else if (remaining < 5.0) health = 'WARNING';
+      else if (remaining < 0.20) health = 'CRITICAL';
+      else if (remaining < 0.50) health = 'WARNING';
 
       // Monthly spend: sum all amounts from the platform cost endpoint.
       let monthlySpend = 0;
@@ -83,13 +83,13 @@ export class DeepSeekConnector extends BaseConnector {
         {
           modelId: 'deepseek-balance',
           modelName: 'Balance',
-          quota: { type: 'credits' as const, total: totalBalance, used: usedBalance, remaining },
+          quota: { type: 'currency' as const, total: 0, used: usedBalance, remaining },
           resetAt: null
         },
         ...(config.DEEPSEEK_PLATFORM_TOKEN ? [{
           modelId: 'deepseek-monthly',
           modelName: 'Monthly Spend',
-          quota: { type: 'credits' as const, total: totalBalance, used: monthlySpend, remaining: totalBalance - monthlySpend },
+          quota: { type: 'currency' as const, total: 0, used: monthlySpend, remaining: monthlySpend },
           resetAt: null
         }] : [])
       ];

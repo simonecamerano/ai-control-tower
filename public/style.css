@@ -486,6 +486,17 @@ h2 {
   white-space: nowrap;
 }
 
+.amount-display {
+  color: #dbeafe;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.model--currency {
+  padding-bottom: 4px;
+}
+
 .progress-track {
   overflow: hidden;
   height: 10px;
