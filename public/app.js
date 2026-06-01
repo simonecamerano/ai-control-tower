@@ -239,8 +239,10 @@ function renderProviderCard(provider) {
     ? models.map(renderModel).join("")
     : '<div class="empty-models">No model quota details available for this provider.</div>';
 
+  const providerClass = provider.provider ? `provider-${escapeHtml(provider.provider.toLowerCase())}` : '';
+
   return `
-    <article class="provider-card">
+    <article class="provider-card ${providerClass}">
       <div class="provider-title">
         <div class="provider-name">
           <h3>${escapeHtml(titleCase(provider.provider))}</h3>

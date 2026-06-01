@@ -355,6 +355,10 @@ h2 {
   transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
+.provider-antigravity {
+  grid-column: 1 / -1;
+}
+
 .provider-card:hover {
   transform: translateY(-3px);
   border-color: rgba(125, 211, 252, 0.22);
@@ -427,6 +431,10 @@ h2 {
 .models-list {
   display: grid;
   gap: 14px;
+}
+
+.provider-antigravity .models-list {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
 .model {

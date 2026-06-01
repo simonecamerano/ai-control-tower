@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `5c266b7 feat: update AntigravityConnector to scan all discovered ports and improve process port identification`
 - `4464856 feat: add script to identify and test antigravity language server process and ports`
 - `8c26eb5 feat: add DEEPSEEK_API_KEY and TAVILY_API_KEY to environment configuration`
 - `50bba01 docs: add comprehensive JSDoc comments to all connector implementations and factory initialization logic.`
@@ -15,7 +16,6 @@
 - `1ca6df1 feat: implement Claude connector and add cache invalidation method to base class`
 - `8bf13fc feat: implement Tavily and DeepSeek API connectors with dedicated unit tests`
 - `1c24f3c feat: initialize and style frontend dashboard with dynamic health tracking and metrics visualization`
-- `c5e6fe9 feat: implement TTL-based caching in BaseConnector and update derived classes to use protected fetchMetricsRaw method`
 
 ## Active Tasks in Code (TODO / FIXME)
 
