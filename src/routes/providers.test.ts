@@ -80,18 +80,18 @@ describe('API Providers Routes', () => {
     expect(response.statusCode).toBe(404);
   });
 
-  test('GET /v1/models/best-match returns HTTP 200 with recommended and fallback models', async () => {
+  test('GET /v1/models/best-match returns HTTP 200 with first and second low-quota models', async () => {
     const response = await server.inject({
       method: 'GET',
       url: '/v1/models/best-match'
     });
     expect(response.statusCode).toBe(200);
     const data = response.json();
-    expect(data).toHaveProperty('recommended');
-    expect(data).toHaveProperty('fallback');
-    if (data.recommended) {
-      expect(data.recommended).toHaveProperty('modelId');
-      expect(data.recommended).toHaveProperty('provider');
+    expect(data).toHaveProperty('first');
+    expect(data).toHaveProperty('second');
+    if (data.first) {
+      expect(data.first).toHaveProperty('modelId');
+      expect(data.first).toHaveProperty('provider');
     }
   });
 });

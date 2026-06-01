@@ -27,9 +27,8 @@ describe('ClaudeConnector', () => {
     config.CLAUDE_SESSION_COOKIE = 'session-cookie';
 
     const mockApiResponse = {
-      five_hour_usage_fraction: 0.3,
-      seven_day_usage_fraction: 0.1,
-      reset_at: '2026-06-01T15:00:00.000Z'
+      five_hour: { utilization: 35.0, resets_at: '2026-06-01T13:40:00.449021+00:00' },
+      seven_day: { utilization: 32.0, resets_at: '2026-06-03T13:00:00.449043+00:00' }
     };
 
     const mockFetch = vi.fn().mockResolvedValue({
@@ -50,17 +49,17 @@ describe('ClaudeConnector', () => {
     expect(result.models[0].quota).toEqual({
       type: 'percent',
       total: 100,
-      used: 30,
-      remaining: 70
+      used: 35,
+      remaining: 65
     });
-    expect(result.models[0].resetAt).toBe('2026-06-01T15:00:00.000Z');
+    expect(result.models[0].resetAt).toBe('2026-06-01T13:40:00.449021+00:00');
 
     expect(result.models[1].modelId).toBe('claude-3-opus');
     expect(result.models[1].quota).toEqual({
       type: 'percent',
       total: 100,
-      used: 10,
-      remaining: 90
+      used: 32,
+      remaining: 68
     });
   });
 

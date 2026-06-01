@@ -2,20 +2,14 @@ import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus, ModelMetrics } from '../types';
 import { config } from '../config';
 
-/**
- * Loosely-typed shape of the Anthropic console `/usage` endpoint response.
- * Fields are `unknown` because the API is undocumented and may change; callers
- * must narrow each value with `typeof` guards before use.
- */
+interface AnthropicUsagePeriod {
+  utilization?: unknown;
+  resets_at?: unknown;
+}
+
 interface AnthropicUsageResponse {
-  /** Fraction (0–1) of the 5-hour rolling token budget consumed — maps to Sonnet quota. */
-  five_hour_usage_fraction?: unknown;
-  /** Fraction (0–1) of the 7-day rolling token budget consumed — maps to Opus quota. */
-  seven_day_usage_fraction?: unknown;
-  reset_at?: unknown;
-  used?: unknown;
-  limit?: unknown;
-  remaining?: unknown;
+  five_hour?: AnthropicUsagePeriod;
+  seven_day?: AnthropicUsagePeriod;
   [key: string]: unknown;
 }
 
@@ -71,18 +65,11 @@ export class ClaudeConnector extends BaseConnector {
 
       const data = (await response.json()) as AnthropicUsageResponse;
 
-      // Guard against missing or non-numeric fields in the undocumented response.
-      const fiveHourFraction =
-        typeof data.five_hour_usage_fraction === 'number' ? data.five_hour_usage_fraction : 0;
-      const sevenDayFraction =
-        typeof data.seven_day_usage_fraction === 'number' ? data.seven_day_usage_fraction : 0;
-      const resetAt = typeof data.reset_at === 'string' ? data.reset_at : null;
-
-      // Convert fractions to integer percentages for a consistent `percent` quota type.
-      const sonnetUsed = Math.round(fiveHourFraction * 100);
-      const sonnetRemaining = Math.round((1 - fiveHourFraction) * 100);
-      const opusUsed = Math.round(sevenDayFraction * 100);
-      const opusRemaining = Math.round((1 - sevenDayFraction) * 100);
+      const sonnetUsed = typeof data.five_hour?.utilization === 'number' ? Math.round(data.five_hour.utilization) : 0;
+      const opusUsed = typeof data.seven_day?.utilization === 'number' ? Math.round(data.seven_day.utilization) : 0;
+      const sonnetRemaining = Math.max(0, 100 - sonnetUsed);
+      const opusRemaining = Math.max(0, 100 - opusUsed);
+      const resetAt = typeof data.five_hour?.resets_at === 'string' ? data.five_hour.resets_at : null;
 
       const models: ModelMetrics[] = [
         {

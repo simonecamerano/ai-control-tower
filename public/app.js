@@ -2,7 +2,7 @@ const POLL_INTERVAL_MS = 10000;
 
 const state = {
   providers: [],
-  recommendation: { recommended: null, fallback: null },
+  recommendation: { first: null, second: null },
   isLoading: false,
   timer: null
 };
@@ -198,17 +198,17 @@ function renderStats() {
 }
 
 function renderRecommendations() {
-  const recommended = state.recommendation.recommended;
-  const fallback = state.recommendation.fallback;
+  const first = state.recommendation.first;
+  const second = state.recommendation.second;
 
-  renderRecommendationSlot(recommended, elements.recommendedModel, elements.recommendedMeta, "No model available");
-  renderRecommendationSlot(fallback, elements.fallbackModel, elements.fallbackMeta, "No fallback available");
+  renderRunningLowSlot(first, elements.recommendedModel, elements.recommendedMeta, "All clear");
+  renderRunningLowSlot(second, elements.fallbackModel, elements.fallbackMeta, "All clear");
 }
 
-function renderRecommendationSlot(model, titleElement, metaElement, emptyText) {
+function renderRunningLowSlot(model, titleElement, metaElement, emptyText) {
   if (!model) {
     titleElement.textContent = emptyText;
-    metaElement.textContent = "No healthy candidates returned";
+    metaElement.textContent = "No providers running low";
     return;
   }
 
@@ -316,7 +316,7 @@ async function refreshDashboard() {
 
     const providers = await loadProviderDetails(normalizeProviders(providersPayload));
     state.providers = providers.sort((a, b) => String(a.provider).localeCompare(String(b.provider)));
-    state.recommendation = recommendation ?? { recommended: null, fallback: null };
+    state.recommendation = recommendation ?? { first: null, second: null };
 
     renderStats();
     renderRecommendations();

@@ -9,6 +9,7 @@ export const config = {
   COPILOT_API_KEY: process.env.COPILOT_API_KEY || '',
   COPILOT_SESSION_COOKIE: process.env.COPILOT_SESSION_COOKIE || '',
   TAVILY_API_KEY: process.env.TAVILY_API_KEY || '',
+  TAVILY_SESSION_COOKIE: process.env.TAVILY_SESSION_COOKIE || '',
   CODEX_API_KEY: process.env.CODEX_API_KEY || '',
   CLAUDE_ORG_ID: process.env.CLAUDE_ORG_ID || '',
   CLAUDE_SESSION_COOKIE: process.env.CLAUDE_SESSION_COOKIE || ''

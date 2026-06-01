@@ -54,18 +54,19 @@ export async function providersRoutes(fastify: FastifyInstance) {
   });
 
   /**
-   * Finds the single best available model across all active providers.
+   * Returns the two coding-assistant models closest to exhaustion.
    *
    * Selection strategy:
-   * 1. Filter out providers with `CRITICAL` or `BLOCKED` health.
-   * 2. Prefer `OK` over `WARNING`.
-   * 3. Within the same health tier, rank by remaining-quota fraction (descending)
-   *    so the model with the most headroom is recommended.
+   * 1. Exclude non-coding providers (e.g. tavily search tool).
+   * 2. Include only active providers that are not BLOCKED.
+   * 3. Sort ascending by remaining-quota fraction so the most depleted model is first.
    *
-   * Returns `{ recommended, fallback }` where `fallback` is the second-best choice.
+   * Returns `{ first, second }` — the two models with the least quota left.
    */
   fastify.get('/v1/models/best-match', async (request, reply) => {
-    const providerNames = ConnectorFactory.getRegisteredProviders();
+    const NON_CODING_PROVIDERS = new Set(['tavily']);
+    const providerNames = ConnectorFactory.getRegisteredProviders()
+      .filter(n => !NON_CODING_PROVIDERS.has(n));
     const allMetrics: ProviderMetrics[] = [];
 
     for (const name of providerNames) {
@@ -76,12 +77,12 @@ export async function providersRoutes(fastify: FastifyInstance) {
           allMetrics.push(metrics);
         }
       } catch (error) {
-        fastify.log.error(error, `Error fetching metrics for ${name} during best-match search`);
+        fastify.log.error(error, `Error fetching metrics for ${name} during low-quota search`);
       }
     }
 
-    const availableModels = allMetrics
-      .filter(p => p.health === 'OK' || p.health === 'WARNING')
+    const candidateModels = allMetrics
+      .filter(p => p.health !== 'BLOCKED')
       .flatMap(p =>
         p.models.map(m => ({
           provider: p.provider,
@@ -94,20 +95,13 @@ export async function providersRoutes(fastify: FastifyInstance) {
         }))
       );
 
-    const sorted = availableModels.sort((a, b) => {
-      // Primary sort: OK before WARNING.
-      if (a.health !== b.health) {
-        return a.health === 'OK' ? -1 : 1;
-      }
-      // Secondary sort: higher remaining fraction first.
+    // Ascending by remaining fraction: most depleted first.
+    const sorted = candidateModels.sort((a, b) => {
       const fractionA = a.remaining / (a.total || 1);
       const fractionB = b.remaining / (b.total || 1);
-      return fractionB - fractionA;
+      return fractionA - fractionB;
     });
 
-    const recommended = sorted[0] || null;
-    const fallback = sorted[1] || null;
-
-    return reply.send({ recommended, fallback });
+    return reply.send({ first: sorted[0] || null, second: sorted[1] || null });
   });
 }
