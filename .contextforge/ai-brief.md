@@ -15,6 +15,10 @@ This document contains an optimized summary of the project context for LLMs.
 #### TypeScript/JavaScript Modules
 - `src/config.ts`:
   - **Exports:** `config`
+- `src/connectors/antigravity.test.ts`:
+- `src/connectors/antigravity.ts`:
+  - **Exports:** `AntigravityConnector`
+  - **Classes:** `AntigravityConnector`
 - `src/connectors/base.ts`:
   - **Exports:** `BaseConnector`
   - **Classes:** `BaseConnector`
@@ -38,7 +42,6 @@ This document contains an optimized summary of the project context for LLMs.
 - `vitest.config.ts`:
 
 ### Open Tasks
-- [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client) *(Phase 2 — Connector Layer Implementation)*
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs *(Phase 2 — Connector Layer Implementation)*
 - [ ] Implement caching mechanism for provider status to prevent self-rate-limiting *(Phase 3 — API Development for AI Orchestrators)*
 - [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design) *(Phase 4 — Visual Dashboard (Frontend))*

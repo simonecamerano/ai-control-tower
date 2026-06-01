@@ -6,6 +6,8 @@
 
 ## Recent 10 Commits
 
+- `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
+- `fd976b1 feat: implement provider health and model matching API endpoints with associated tests`
 - `72695b9 feat: implement mock connectors for external AI providers and integrate them into the application startup sequence`
 - `b514c26 feat: implement base Connector class and registry factory pattern`
 - `bf0dca2 feat: initialize TypeScript backend project with Fastify, Vitest, and shared metrics interfaces`
@@ -18,7 +20,7 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 8/18 tasks completed (44%)
+**Progress:** 9/18 tasks completed (50%)
 
 ### Phase 1 — Project setup & Architecture Definition
 - [x] Initialize TypeScript, Fastify/Express backend project setup
@@ -28,7 +30,7 @@ No TODO or FIXME comments found in the code.
 
 ### Phase 2 — Connector Layer Implementation
 - [x] Create base Connector class/interface and factory pattern
-- [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client)
+- [x] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client)
 - [x] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs
 

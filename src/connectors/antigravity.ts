@@ -2,15 +2,20 @@ import { execSync } from 'child_process';
 import { BaseConnector } from './base';
 import { ProviderMetrics, ModelMetrics, HealthStatus } from '../types';
 
-interface AntigravityModel {
-  modelId?: string;
-  modelName?: string;
-  remainingFraction: number;
-  resetTime?: string | number | null;
+interface ClientModelConfig {
+  label: string;
+  quotaInfo?: {
+    remainingFraction?: number;
+    resetTime?: string | number | null;
+  };
 }
 
 interface AntigravityResponse {
-  models?: AntigravityModel[];
+  userStatus?: {
+    cascadeModelConfigData?: {
+      clientModelConfigs?: ClientModelConfig[];
+    };
+  };
 }
 
 function normalizeModelId(name: string): string {
@@ -23,7 +28,7 @@ function toIsoString(resetTime: string | number | null | undefined): string | nu
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
-function findLanguageServerProcess(): { port: number; csrfToken: string } | null {
+function findLanguageServerProcess(): { pid: string; csrfToken: string } | null {
   let output: string;
   try {
     output = execSync('ps aux', { encoding: 'utf8' });
@@ -37,22 +42,31 @@ function findLanguageServerProcess(): { port: number; csrfToken: string } | null
 
   const lines = output.split('\n');
   const targetLine = lines.find(
-    (line) => line.includes('/bin/language_server') || line.includes('language_server_linux_x64')
+    (line) =>
+      (line.includes('/bin/language_server') || line.includes('language_server_linux_x64')) &&
+      line.includes('antigravity')
   );
 
   if (!targetLine) return null;
 
-  const portMatch = targetLine.match(/--extension_server_port[=\s]+(\d+)/);
-  const tokenMatch = targetLine.match(
-    /--csrf_token[=\s]+([\w-]+(?:-[\w-]+)*)/
-  );
+  const columns = targetLine.trim().split(/\s+/);
+  const pid = columns[1];
 
-  if (!portMatch || !tokenMatch) return null;
+  const tokenMatch = targetLine.match(/--csrf_token[=\s]+([\w-]+(?:-[\w-]+)*)/);
 
-  return {
-    port: parseInt(portMatch[1], 10),
-    csrfToken: tokenMatch[1],
-  };
+  if (!pid || !tokenMatch) return null;
+
+  return { pid, csrfToken: tokenMatch[1] };
+}
+
+function findProcessPort(pid: string): number | null {
+  try {
+    const output = execSync(`lsof -nP -iTCP -sTCP:LISTEN -a -p ${pid}`, { encoding: 'utf8' });
+    const match = output.match(/127\.0\.0\.1:(\d+)/);
+    return match ? parseInt(match[1], 10) : null;
+  } catch {
+    return null;
+  }
 }
 
 export class AntigravityConnector extends BaseConnector {
@@ -71,65 +85,69 @@ export class AntigravityConnector extends BaseConnector {
       lastUpdatedAt: now,
     };
 
-    const process = findLanguageServerProcess();
-    if (!process) {
-      console.log('AntigravityConnector: process not found');
-      return errorResult;
-    }
-    console.log('AntigravityConnector: found process:', process);
+    const proc = findLanguageServerProcess();
+    if (!proc) return errorResult;
+
+    const port = findProcessPort(proc.pid);
+    if (!port) return errorResult;
 
     let data: AntigravityResponse;
     try {
       const response = await fetch(
-        `http://127.0.0.1:${process.port}/exa.language_server_pb.LanguageServerService/GetUserStatus`,
+        `http://127.0.0.1:${port}/exa.language_server_pb.LanguageServerService/GetUserStatus`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'X-Csrf-Token': process.csrfToken,
+            'Connect-Protocol-Version': '1',
+            'x-codeium-csrf-token': proc.csrfToken,
           },
-          body: '{}',
+          body: JSON.stringify({
+            metadata: {
+              ideName: 'antigravity',
+              extensionName: 'antigravity',
+              ideVersion: 'unknown',
+              locale: 'en',
+            },
+          }),
         }
       );
       data = (await response.json()) as AntigravityResponse;
-    } catch (err) {
-      console.log('AntigravityConnector: fetch failed:', err);
+    } catch {
       return errorResult;
     }
 
-    const rawModels: AntigravityModel[] = data.models ?? [];
+    const clientModelConfigs =
+      data?.userStatus?.cascadeModelConfigData?.clientModelConfigs ?? [];
 
-    const models: ModelMetrics[] = rawModels.map((m) => {
-      const originalName = m.modelName ?? m.modelId ?? 'unknown';
-      const fraction = typeof m.remainingFraction === 'number' ? m.remainingFraction : 0;
-      const used = Math.round((1 - fraction) * 100);
-      const remaining = Math.round(fraction * 100);
+    const rawFractions: number[] = [];
+    const models: ModelMetrics[] = clientModelConfigs.map((m) => {
+      const label = m.label ?? 'unknown';
+      const fraction =
+        typeof m.quotaInfo?.remainingFraction === 'number' ? m.quotaInfo.remainingFraction : 0;
+      rawFractions.push(fraction);
 
       return {
-        modelId: normalizeModelId(originalName),
-        modelName: originalName,
+        modelId: normalizeModelId(label),
+        modelName: label,
         quota: {
           type: 'percent',
           total: 100,
-          used,
-          remaining,
+          used: Math.round((1 - fraction) * 100),
+          remaining: Math.round(fraction * 100),
         },
-        resetAt: toIsoString(m.resetTime),
+        resetAt: toIsoString(m.quotaInfo?.resetTime),
       };
     });
 
     let health: HealthStatus;
-    if (models.length === 0) {
+    if (models.length === 0 || rawFractions.every((f) => f === 0)) {
       health = 'BLOCKED';
     } else {
-      const avgFraction =
-        rawModels.reduce((sum, m) => sum + (m.remainingFraction ?? 0), 0) / rawModels.length;
-
-      if (rawModels.every((m) => (m.remainingFraction ?? 0) === 0)) {
-        health = 'BLOCKED';
-      } else if (avgFraction > 0.3) {
+      const avg = rawFractions.reduce((sum, f) => sum + f, 0) / rawFractions.length;
+      if (avg > 0.3) {
         health = 'OK';
-      } else if (avgFraction >= 0.1) {
+      } else if (avg >= 0.1) {
         health = 'WARNING';
       } else {
         health = 'CRITICAL';

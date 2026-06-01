@@ -8,6 +8,18 @@ This document provides a structured overview of the project's source modules.
 - **Exports:** `config`
 - **Imports from:** `dotenv`
 
+### [src/connectors/antigravity.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/antigravity.test.ts)
+- **Exports:** *none*
+- **Functions:** `isValidISODate`
+- **Imports from:** `vitest`, `./antigravity`
+
+### [src/connectors/antigravity.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/antigravity.ts)
+- **Exports:** `AntigravityConnector`
+- **Classes:**
+  - `AntigravityConnector` (Methods: `fetchMetrics`)
+- **Functions:** `normalizeModelId`, `toIsoString`, `findLanguageServerProcess`, `findProcessPort`
+- **Imports from:** `child_process`, `./base`, `../types`
+
 ### [src/connectors/base.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/base.ts)
 - **Exports:** `BaseConnector`
 - **Classes:**
@@ -29,7 +41,7 @@ This document provides a structured overview of the project's source modules.
 ### [src/connectors/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/index.ts)
 - **Exports:** `initializeConnectors`
 - **Functions:** `initializeConnectors`
-- **Imports from:** `./factory`, `./mock`
+- **Imports from:** `./factory`, `./mock`, `./antigravity`
 
 ### [src/connectors/mock.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/mock.test.ts)
 - **Exports:** *none*
