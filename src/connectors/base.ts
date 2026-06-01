@@ -28,5 +28,9 @@ export abstract class BaseConnector {
     return freshMetrics;
   }
 
+  public clearCache(): void {
+    this.cachedMetrics = null;
+  }
+
   protected abstract fetchMetricsRaw(): Promise<ProviderMetrics>;
 }

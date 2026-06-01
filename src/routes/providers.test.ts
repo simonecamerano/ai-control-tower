@@ -1,7 +1,9 @@
-import { expect, test, describe, beforeAll } from 'vitest';
+import { expect, test, describe, beforeAll, vi } from 'vitest';
 import Fastify from 'fastify';
 import { initializeConnectors } from '../connectors';
+import { ConnectorFactory } from '../connectors/factory';
 import { providersRoutes } from './providers';
+import { config } from '../config';
 
 const server = Fastify();
 
@@ -34,15 +36,40 @@ describe('API Providers Routes', () => {
   });
 
   test('GET /v1/providers/claude returns HTTP 200 and full mock metrics', async () => {
-    const response = await server.inject({
-      method: 'GET',
-      url: '/v1/providers/claude'
+    config.CLAUDE_ORG_ID = 'test-org';
+    config.CLAUDE_SESSION_COOKIE = 'session-cookie';
+
+    // Clear cache to bypass any previous inactive cached responses
+    ConnectorFactory.getConnector('claude').clearCache();
+
+    const mockApiResponse = {
+      five_hour_usage_fraction: 0.3,
+      seven_day_usage_fraction: 0.1,
+      reset_at: '2026-06-01T15:00:00.000Z'
+    };
+
+    const mockFetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockApiResponse
     });
-    expect(response.statusCode).toBe(200);
-    const data = response.json();
-    expect(data.provider).toBe('claude');
-    expect(data.status).toBe('active');
-    expect(data.models).toHaveLength(2);
+    const originalFetch = global.fetch;
+    global.fetch = mockFetch;
+
+    try {
+      const response = await server.inject({
+        method: 'GET',
+        url: '/v1/providers/claude'
+      });
+      expect(response.statusCode).toBe(200);
+      const data = response.json();
+      expect(data.provider).toBe('claude');
+      expect(data.status).toBe('active');
+      expect(data.models).toHaveLength(2);
+    } finally {
+      global.fetch = originalFetch;
+      config.CLAUDE_ORG_ID = '';
+      config.CLAUDE_SESSION_COOKIE = '';
+    }
   });
 
   test('GET /v1/providers/non-existent returns HTTP 404', async () => {

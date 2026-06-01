@@ -8,7 +8,7 @@ class TestConnector extends BaseConnector {
     super('test-provider');
   }
 
-  public async fetchMetrics(): Promise<ProviderMetrics> {
+  protected async fetchMetricsRaw(): Promise<ProviderMetrics> {
     return {
       provider: 'test-provider',
       status: 'active',
