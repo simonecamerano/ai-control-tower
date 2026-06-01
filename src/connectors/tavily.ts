@@ -2,6 +2,13 @@ import { config } from '../config';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus } from '../types';
 
+/**
+ * Connector for Tavily Search.
+ *
+ * Queries the Tavily usage API (`GET /usage`) to retrieve the monthly search
+ * request quota. Requires `TAVILY_API_KEY`; returns `inactive` when the key is
+ * absent.
+ */
 export class TavilyConnector extends BaseConnector {
   constructor() {
     super('tavily');
@@ -44,9 +51,11 @@ export class TavilyConnector extends BaseConnector {
 
       const data = await response.json();
 
+      // The Tavily API may nest quota info under `data.key` (API-key scope) or
+      // `data.account` (account scope) depending on the plan and endpoint version.
       let usage = 0;
       let limit = 0;
-      
+
       if (data.key && typeof data.key.usage === 'number' && typeof data.key.limit === 'number') {
         usage = data.key.usage;
         limit = data.key.limit;

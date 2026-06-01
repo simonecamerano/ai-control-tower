@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `da8f06d fix: correct HTML link tags and complete Phase 5 QA tasks in project documentation`
 - `533512a feat: add Codex connector to monitor usage and rate limits`
 - `4078cbd feat: implement Claude, Copilot, DeepSeek, and Tavily connectors with unit tests and register them in the factory`
 - `1ca6df1 feat: implement Claude connector and add cache invalidation method to base class`
@@ -15,7 +16,6 @@
 - `7b84099 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `fd976b1 feat: implement provider health and model matching API endpoints with associated tests`
-- `72695b9 feat: implement mock connectors for external AI providers and integrate them into the application startup sequence`
 
 ## Active Tasks in Code (TODO / FIXME)
 

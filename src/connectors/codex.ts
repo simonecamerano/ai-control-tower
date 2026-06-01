@@ -3,12 +3,22 @@ import * as path from 'path';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus, ModelMetrics } from '../types';
 
+/**
+ * Connector for OpenAI Codex (via the ChatGPT WHAM usage endpoint).
+ *
+ * Authentication is read from the local `~/.codex/auth.json` file written by
+ * the Codex CLI. If the file is absent or lacks an access token, the connector
+ * reports `inactive`. The connector tracks two rate-limit windows
+ * ("primary" and "secondary") that correspond to short-term burst and
+ * longer-term rolling quotas.
+ */
 export class CodexConnector extends BaseConnector {
   constructor() {
     super('codex');
   }
 
   protected async fetchMetricsRaw(): Promise<ProviderMetrics> {
+    // Resolve the auth file path in a cross-platform way (HOME on Unix, USERPROFILE on Windows).
     const home = process.env.HOME || process.env.USERPROFILE || '';
     const authPath = path.join(home, '.codex', 'auth.json');
     const now = new Date().toISOString();
@@ -45,6 +55,8 @@ export class CodexConnector extends BaseConnector {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       };
 
+      // The account ID header is optional but improves quota attribution on
+      // multi-account setups.
       if (accountId) {
         headers['ChatGPT-Account-Id'] = accountId;
       }
@@ -95,6 +107,7 @@ export class CodexConnector extends BaseConnector {
             used: primaryUsed,
             remaining: Math.max(0, 100 - primaryUsed)
           },
+          // reset_at from the API is a Unix timestamp in seconds; convert to ms for Date.
           resetAt: primaryWindow.reset_at ? new Date(primaryWindow.reset_at * 1000).toISOString() : null
         });
       }
@@ -114,6 +127,7 @@ export class CodexConnector extends BaseConnector {
         });
       }
 
+      // The explicit `limit_reached` flag takes precedence over usage percentages.
       let health: HealthStatus = 'OK';
       if (limitReached) {
         health = 'BLOCKED';
@@ -129,8 +143,10 @@ export class CodexConnector extends BaseConnector {
         }
       }
 
-      const primaryReset = primaryWindow?.reset_at 
-        ? new Date(primaryWindow.reset_at * 1000).toISOString() 
+      // Use the primary window's reset time as the top-level resetAt since it
+      // represents the most imminent quota refresh.
+      const primaryReset = primaryWindow?.reset_at
+        ? new Date(primaryWindow.reset_at * 1000).toISOString()
         : null;
 
       return {

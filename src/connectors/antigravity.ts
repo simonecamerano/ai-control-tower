@@ -2,14 +2,17 @@ import { execSync } from 'child_process';
 import { BaseConnector } from './base';
 import { ProviderMetrics, ModelMetrics, HealthStatus } from '../types';
 
+/** Per-model quota data returned inside the Antigravity language server response. */
 interface ClientModelConfig {
   label: string;
   quotaInfo?: {
     remainingFraction?: number;
+    /** Unix timestamp (seconds) or ISO string indicating when the quota resets. */
     resetTime?: string | number | null;
   };
 }
 
+/** Relevant subset of the `GetUserStatus` RPC response from the language server. */
 interface AntigravityResponse {
   userStatus?: {
     cascadeModelConfigData?: {
@@ -18,16 +21,32 @@ interface AntigravityResponse {
   };
 }
 
+/**
+ * Converts a human-readable model label (e.g. "GPT-4o") to a URL-safe, lower-case
+ * kebab-case identifier (e.g. "gpt-4o").
+ */
 function normalizeModelId(name: string): string {
   return name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 }
 
+/**
+ * Converts a Unix timestamp (seconds) or an ISO/parseable date string to an ISO 8601
+ * string. Returns `null` for `null`/`undefined` values or unparseable inputs.
+ */
 function toIsoString(resetTime: string | number | null | undefined): string | null {
   if (resetTime == null) return null;
+  // The language server may return the reset time as a Unix epoch in seconds.
   const d = new Date(typeof resetTime === 'number' ? resetTime * 1000 : resetTime);
   return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+/**
+ * Scans the system process list for the Codeium/Antigravity language server and
+ * extracts its PID and CSRF token from the command-line arguments.
+ *
+ * Falls back from `ps aux` to `ps -ef` for compatibility with different Unix flavours.
+ * Returns `null` if the process is not found or the token cannot be parsed.
+ */
 function findLanguageServerProcess(): { pid: string; csrfToken: string } | null {
   let output: string;
   try {
@@ -52,6 +71,7 @@ function findLanguageServerProcess(): { pid: string; csrfToken: string } | null 
   const columns = targetLine.trim().split(/\s+/);
   const pid = columns[1];
 
+  // The CSRF token is passed as a CLI flag: --csrf_token=<token> or --csrf_token <token>
   const tokenMatch = targetLine.match(/--csrf_token[=\s]+([\w-]+(?:-[\w-]+)*)/);
 
   if (!pid || !tokenMatch) return null;
@@ -59,6 +79,12 @@ function findLanguageServerProcess(): { pid: string; csrfToken: string } | null 
   return { pid, csrfToken: tokenMatch[1] };
 }
 
+/**
+ * Uses `lsof` to discover which localhost TCP port the language server process
+ * (identified by PID) is listening on.
+ *
+ * Returns `null` when `lsof` is unavailable or no matching port is found.
+ */
 function findProcessPort(pid: string): number | null {
   try {
     const output = execSync(`lsof -nP -iTCP -sTCP:LISTEN -a -p ${pid}`, { encoding: 'utf8' });
@@ -69,6 +95,14 @@ function findProcessPort(pid: string): number | null {
   }
 }
 
+/**
+ * Connector for Antigravity (Codeium's local language server).
+ *
+ * Rather than hitting a remote API, this connector introspects the running
+ * `language_server` process: it reads its PID and CSRF token from the process
+ * list, discovers the HTTP port via `lsof`, and queries the local gRPC-Web
+ * endpoint for per-model quota fractions.
+ */
 export class AntigravityConnector extends BaseConnector {
   constructor() {
     super('antigravity');
@@ -120,6 +154,7 @@ export class AntigravityConnector extends BaseConnector {
     const clientModelConfigs =
       data?.userStatus?.cascadeModelConfigData?.clientModelConfigs ?? [];
 
+    // Collect raw fractions separately so we can compute the average for health scoring.
     const rawFractions: number[] = [];
     const models: ModelMetrics[] = clientModelConfigs.map((m) => {
       const label = m.label ?? 'unknown';
@@ -140,6 +175,8 @@ export class AntigravityConnector extends BaseConnector {
       };
     });
 
+    // Health is derived from the average remaining fraction across all models.
+    // All-zero fractions (or no models) are treated as BLOCKED.
     let health: HealthStatus;
     if (models.length === 0 || rawFractions.every((f) => f === 0)) {
       health = 'BLOCKED';
@@ -154,6 +191,7 @@ export class AntigravityConnector extends BaseConnector {
       }
     }
 
+    // Use the soonest reset time across all models as the top-level resetAt.
     const earliestReset =
       models
         .map((m) => m.resetAt)

@@ -2,6 +2,16 @@ import { config } from '../config';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus } from '../types';
 
+/**
+ * Connector for DeepSeek.
+ *
+ * Queries the DeepSeek balance API (`GET /user/balance`) to derive credit
+ * usage. Requires `DEEPSEEK_API_KEY`; returns `inactive` when the key is
+ * absent.
+ *
+ * DeepSeek credits are shared across all models, so the same quota object is
+ * attached to each model entry.
+ */
 export class DeepSeekConnector extends BaseConnector {
   constructor() {
     super('deepseek');
@@ -48,10 +58,14 @@ export class DeepSeekConnector extends BaseConnector {
       }
 
       const balanceInfo = data.balance_infos[0];
+      // DeepSeek tracks two credit pools: purchased top-ups and granted (promotional) credits.
+      // Their sum is the effective total budget.
       const totalBalance = parseFloat(balanceInfo.topped_up_balance || '0') + parseFloat(balanceInfo.granted_balance || '0');
       const remainingBalance = parseFloat(balanceInfo.total_balance || '0');
+      // Limit floating-point drift to 4 decimal places when computing consumed credits.
       const usedBalance = Number((totalBalance - remainingBalance).toFixed(4));
 
+      // Prefer the explicit `is_available` flag; fall back to a balance check.
       const isAvailable = data.is_available ?? (remainingBalance > 0);
       let health: HealthStatus = 'OK';
       if (!isAvailable || remainingBalance <= 0) {
@@ -73,6 +87,8 @@ export class DeepSeekConnector extends BaseConnector {
         provider: 'deepseek',
         status: 'active',
         health,
+        // Expose the shared balance as a top-level globalQuota so dashboards can
+        // display it without iterating over individual model entries.
         globalQuota: quota,
         models: [
           {
