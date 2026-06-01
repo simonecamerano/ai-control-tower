@@ -55,11 +55,13 @@
                 <span class="label">Most Critical</span>
                 <strong id="recommended-model">Loading</strong>
                 <span id="recommended-meta">Checking availability</span>
+                <span class="reset-hint" id="recommended-reset"></span>
               </div>
               <div class="recommendation-card">
                 <span class="label">Next to Watch</span>
                 <strong id="fallback-model">Loading</strong>
                 <span id="fallback-meta">Checking availability</span>
+                <span class="reset-hint" id="fallback-reset"></span>
               </div>
             </div>
           </article>
@@ -74,12 +76,14 @@
               <strong id="active-models">0</strong>
             </article>
             <article class="stat-card alert">
-              <span>Critical Alerts</span>
+              <span>Critical</span>
               <strong id="critical-alerts">0</strong>
+              <span class="stat-sub" id="critical-alerts-who"></span>
             </article>
-            <article class="stat-card">
-              <span>Next Reset</span>
-              <strong id="next-reset">No reset</strong>
+            <article class="stat-card blocked">
+              <span>Blocked</span>
+              <strong id="blocked-alerts">0</strong>
+              <span class="stat-sub" id="blocked-alerts-who"></span>
             </article>
           </section>
         </section>

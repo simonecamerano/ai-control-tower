@@ -71,23 +71,24 @@ export class ClaudeConnector extends BaseConnector {
       const opusRemaining = Math.max(0, 100 - opusUsed);
       const resetAt = typeof data.five_hour?.resets_at === 'string' ? data.five_hour.resets_at : null;
 
+      const fiveHourResetAt = typeof data.five_hour?.resets_at === 'string' ? data.five_hour.resets_at : null;
+      const sevenDayResetAt = typeof data.seven_day?.resets_at === 'string' ? data.seven_day.resets_at : null;
+
       const models: ModelMetrics[] = [
         {
-          modelId: 'claude-3-5-sonnet',
-          modelName: 'Claude 3.5 Sonnet',
+          modelId: 'claude-5h-window',
+          modelName: 'Claude Session',
           quota: { type: 'percent', total: 100, used: sonnetUsed, remaining: sonnetRemaining },
-          resetAt
+          resetAt: fiveHourResetAt
         },
         {
-          modelId: 'claude-3-opus',
-          modelName: 'Claude 3 Opus',
+          modelId: 'claude-7d-window',
+          modelName: 'Claude Weekly',
           quota: { type: 'percent', total: 100, used: opusUsed, remaining: opusRemaining },
-          resetAt
+          resetAt: sevenDayResetAt
         }
       ];
 
-      // Health is driven by the worst-case model: if any model is near its limit the
-      // whole provider is flagged accordingly.
       const maxUsed = Math.max(sonnetUsed, opusUsed);
       const health: HealthStatus = maxUsed >= 90 ? 'CRITICAL' : maxUsed >= 70 ? 'WARNING' : 'OK';
 
@@ -96,7 +97,7 @@ export class ClaudeConnector extends BaseConnector {
         status: 'active',
         health,
         models,
-        resetAt,
+        resetAt: fiveHourResetAt,
         lastUpdatedAt: new Date().toISOString()
       };
     } catch {

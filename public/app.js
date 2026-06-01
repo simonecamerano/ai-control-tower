@@ -15,11 +15,15 @@ const elements = {
   totalProviders: document.querySelector("#total-providers"),
   activeModels: document.querySelector("#active-models"),
   criticalAlerts: document.querySelector("#critical-alerts"),
-  nextReset: document.querySelector("#next-reset"),
+  criticalAlertsWho: document.querySelector("#critical-alerts-who"),
+  blockedAlerts: document.querySelector("#blocked-alerts"),
+  blockedAlertsWho: document.querySelector("#blocked-alerts-who"),
   recommendedModel: document.querySelector("#recommended-model"),
   recommendedMeta: document.querySelector("#recommended-meta"),
+  recommendedReset: document.querySelector("#recommended-reset"),
   fallbackModel: document.querySelector("#fallback-model"),
   fallbackMeta: document.querySelector("#fallback-meta"),
+  fallbackReset: document.querySelector("#fallback-reset"),
   errorToast: document.querySelector("#error-toast")
 };
 
@@ -182,41 +186,52 @@ async function loadProviderDetails(providers) {
 
 function renderStats() {
   const providers = state.providers;
-  const criticalCount = providers.filter((provider) => ["CRITICAL", "BLOCKED"].includes(provider.health)).length;
+  const criticalProviders = providers.filter((p) => p.health === "CRITICAL");
+  const blockedProviders = providers.filter((p) => p.health === "BLOCKED");
+  const criticalCount = criticalProviders.length;
   const activeModels = providers.reduce((total, provider) => total + (provider.models?.length ?? 0), 0);
-  const resetDates = providers
-    .flatMap((provider) => [provider.resetAt, ...(provider.models ?? []).map((model) => model.resetAt)])
-    .filter(Boolean)
-    .map((date) => new Date(date))
-    .filter((date) => !Number.isNaN(date.getTime()) && date.getTime() > Date.now())
-    .sort((a, b) => a.getTime() - b.getTime());
 
   elements.totalProviders.textContent = String(providers.length);
   elements.activeModels.textContent = String(activeModels);
   elements.criticalAlerts.textContent = String(criticalCount);
-  elements.nextReset.textContent = resetDates[0] ? formatFriendlyDuration(resetDates[0]) : "No reset";
+  if (elements.criticalAlertsWho) {
+    elements.criticalAlertsWho.textContent = criticalProviders.length
+      ? criticalProviders.map((p) => titleCase(p.provider)).join(", ")
+      : "";
+  }
+  if (elements.blockedAlerts) {
+    elements.blockedAlerts.textContent = String(blockedProviders.length);
+  }
+  if (elements.blockedAlertsWho) {
+    elements.blockedAlertsWho.textContent = blockedProviders.length
+      ? blockedProviders.map((p) => titleCase(p.provider)).join(", ")
+      : "";
+  }
+
 }
 
 function renderRecommendations() {
   const first = state.recommendation.first;
   const second = state.recommendation.second;
 
-  renderRunningLowSlot(first, elements.recommendedModel, elements.recommendedMeta, "All clear");
-  renderRunningLowSlot(second, elements.fallbackModel, elements.fallbackMeta, "All clear");
+  renderRunningLowSlot(first, elements.recommendedModel, elements.recommendedMeta, elements.recommendedReset, "All clear");
+  renderRunningLowSlot(second, elements.fallbackModel, elements.fallbackMeta, elements.fallbackReset, "All clear");
 }
 
-function renderRunningLowSlot(model, titleElement, metaElement, emptyText) {
+function renderRunningLowSlot(model, titleElement, metaElement, resetElement, emptyText) {
   if (!model) {
     titleElement.textContent = emptyText;
     metaElement.textContent = "No providers running low";
+    if (resetElement) resetElement.textContent = "";
     return;
   }
 
   const percent = getQuotaPercent(model);
-  const type = model.type ?? model.quota?.type ?? "quota";
-
   titleElement.textContent = model.modelName ?? model.modelId ?? "Unnamed model";
-  metaElement.textContent = `${titleCase(model.provider)} · ${percent}% remaining · ${formatNumber(model.remaining ?? model.quota?.remaining)} ${type}`;
+  metaElement.textContent = `${percent}% remaining`;
+  if (resetElement) {
+    resetElement.textContent = model.resetAt ? `resets ${formatFriendlyDuration(model.resetAt)}` : "";
+  }
 }
 
 function renderProviders() {

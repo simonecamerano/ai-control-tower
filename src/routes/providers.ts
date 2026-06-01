@@ -91,7 +91,8 @@ export async function providersRoutes(fastify: FastifyInstance) {
           remaining: m.quota.remaining,
           total: m.quota.total,
           type: m.quota.type,
-          health: p.health
+          health: p.health,
+          resetAt: m.resetAt ?? p.resetAt ?? null
         }))
       );
 

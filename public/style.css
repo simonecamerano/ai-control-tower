@@ -318,6 +318,29 @@ h2 {
   text-shadow: 0 0 22px rgba(251, 113, 133, 0.46);
 }
 
+.stat-card.blocked strong {
+  color: #94a3b8;
+}
+
+.stat-card--wide {
+  grid-column: 1 / -1;
+}
+
+.stat-sub {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.75rem;
+  opacity: 0.55;
+  letter-spacing: 0.03em;
+}
+
+.reset-hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.78rem;
+  opacity: 0.45;
+}
+
 .content-header {
   justify-content: space-between;
   gap: 18px;

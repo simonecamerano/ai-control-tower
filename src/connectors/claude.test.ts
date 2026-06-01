@@ -45,7 +45,8 @@ describe('ClaudeConnector', () => {
     expect(result.health).toBe('OK');
     expect(result.models).toHaveLength(2);
 
-    expect(result.models[0].modelId).toBe('claude-3-5-sonnet');
+    expect(result.models[0].modelId).toBe('claude-5h-window');
+    expect(result.models[0].modelName).toBe('Claude Session');
     expect(result.models[0].quota).toEqual({
       type: 'percent',
       total: 100,
@@ -54,13 +55,15 @@ describe('ClaudeConnector', () => {
     });
     expect(result.models[0].resetAt).toBe('2026-06-01T13:40:00.449021+00:00');
 
-    expect(result.models[1].modelId).toBe('claude-3-opus');
+    expect(result.models[1].modelId).toBe('claude-7d-window');
+    expect(result.models[1].modelName).toBe('Claude Weekly');
     expect(result.models[1].quota).toEqual({
       type: 'percent',
       total: 100,
       used: 32,
       remaining: 68
     });
+    expect(result.models[1].resetAt).toBe('2026-06-03T13:00:00.449043+00:00');
   });
 
   test('should return error status and BLOCKED health on failed response', async () => {

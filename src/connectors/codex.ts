@@ -100,7 +100,7 @@ export class CodexConnector extends BaseConnector {
         const primaryUsed = primaryWindow.used_percent ?? 0;
         models.push({
           modelId: 'codex-primary',
-          modelName: 'Codex Primary Window',
+          modelName: 'Codex Session',
           quota: {
             type: 'percent',
             total: 100,
@@ -116,7 +116,7 @@ export class CodexConnector extends BaseConnector {
         const secondaryUsed = secondaryWindow.used_percent ?? 0;
         models.push({
           modelId: 'codex-secondary',
-          modelName: 'Codex Secondary Window',
+          modelName: 'Codex Weekly',
           quota: {
             type: 'percent',
             total: 100,
