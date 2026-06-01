@@ -46,6 +46,16 @@ This document provides a structured overview of the project's source modules.
   - `ClaudeConnector` (Methods: `fetchMetricsRaw`)
 - **Imports from:** `./base`, `../types`, `../config`
 
+### [src/connectors/codex.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/codex.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `fs`, `./codex`
+
+### [src/connectors/codex.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/codex.ts)
+- **Exports:** `CodexConnector`
+- **Classes:**
+  - `CodexConnector` (Methods: `fetchMetricsRaw`)
+- **Imports from:** `fs`, `path`, `./base`, `../types`
+
 ### [src/connectors/copilot.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/copilot.test.ts)
 - **Exports:** *none*
 - **Imports from:** `vitest`, `./copilot`, `../config`
@@ -81,7 +91,7 @@ This document provides a structured overview of the project's source modules.
 ### [src/connectors/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/index.ts)
 - **Exports:** `initializeConnectors`
 - **Functions:** `initializeConnectors`
-- **Imports from:** `./factory`, `./mock`, `./antigravity`, `./deepseek`, `./tavily`, `./claude`, `./copilot`
+- **Imports from:** `./factory`, `./mock`, `./antigravity`, `./deepseek`, `./tavily`, `./claude`, `./copilot`, `./codex`
 
 ### [src/connectors/mock.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/mock.test.ts)
 - **Exports:** *none*
