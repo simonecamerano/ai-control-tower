@@ -8,6 +8,24 @@ This document provides a structured overview of the project's source modules.
 - **Exports:** `config`
 - **Imports from:** `dotenv`
 
+### [src/connectors/base.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/base.ts)
+- **Exports:** `BaseConnector`
+- **Classes:**
+  - `BaseConnector` (Methods: `getProviderName`, `fetchMetrics`)
+- **Imports from:** `../types`
+
+### [src/connectors/factory.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/factory.test.ts)
+- **Exports:** *none*
+- **Classes:**
+  - `TestConnector` (Methods: `fetchMetrics`)
+- **Imports from:** `vitest`, `./factory`, `./base`, `../types`
+
+### [src/connectors/factory.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/factory.ts)
+- **Exports:** `ConnectorFactory`
+- **Classes:**
+  - `ConnectorFactory` (Methods: `register`, `getConnector`, `getRegisteredProviders`)
+- **Imports from:** `./base`
+
 ### [src/index.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.test.ts)
 - **Exports:** *none*
 - **Imports from:** `vitest`

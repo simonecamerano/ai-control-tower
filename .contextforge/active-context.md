@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `bf0dca2 feat: initialize TypeScript backend project with Fastify, Vitest, and shared metrics interfaces`
 - `f5872b2 docs: define comprehensive project roadmap and task tracking in context files`
 - `c3acbbd chore: initialize project structure with context management, model routing rules, and base configuration files`
 
@@ -15,7 +16,7 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 4/18 tasks completed (22%)
+**Progress:** 5/18 tasks completed (28%)
 
 ### Phase 1 — Project setup & Architecture Definition
 - [x] Initialize TypeScript, Fastify/Express backend project setup
@@ -24,7 +25,7 @@ No TODO or FIXME comments found in the code.
 - [x] Implement configuration manager to load API keys and endpoints securely (e.g., dotenv)
 
 ### Phase 2 — Connector Layer Implementation
-- [ ] Create base Connector class/interface and factory pattern
+- [x] Create base Connector class/interface and factory pattern
 - [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client)
 - [ ] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs

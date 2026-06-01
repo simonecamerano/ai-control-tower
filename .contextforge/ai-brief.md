@@ -15,13 +15,20 @@ This document contains an optimized summary of the project context for LLMs.
 #### TypeScript/JavaScript Modules
 - `src/config.ts`:
   - **Exports:** `config`
+- `src/connectors/base.ts`:
+  - **Exports:** `BaseConnector`
+  - **Classes:** `BaseConnector`
+- `src/connectors/factory.test.ts`:
+  - **Classes:** `TestConnector`
+- `src/connectors/factory.ts`:
+  - **Exports:** `ConnectorFactory`
+  - **Classes:** `ConnectorFactory`
 - `src/index.test.ts`:
 - `src/index.ts`:
 - `src/types/index.ts`:
 - `vitest.config.ts`:
 
 ### Open Tasks
-- [ ] Create base Connector class/interface and factory pattern *(Phase 2 — Connector Layer Implementation)*
 - [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client) *(Phase 2 — Connector Layer Implementation)*
 - [ ] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing *(Phase 2 — Connector Layer Implementation)*
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs *(Phase 2 — Connector Layer Implementation)*
