@@ -2,7 +2,7 @@
 
 - **Project Name:** ai-control-tower
 - **Version:** 1.0.0
-- **Languages:** Markdown, JSON, TypeScript
+- **Languages:** Markdown, JSON, JavaScript, HTML, CSS, TypeScript
 
 ## Scripts
 
@@ -17,6 +17,7 @@
 
 ### Production Dependencies
 
+- `@fastify/static`: `^7.0.4`
 - `dotenv`: `^16.4.5`
 - `fastify`: `^4.28.1`
 

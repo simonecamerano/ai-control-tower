@@ -4,15 +4,17 @@ This document contains an optimized summary of the project context for LLMs.
 
 ## Project Overview
 - **Project:** ai-control-tower
-- **Languages:** Markdown, JSON, TypeScript
+- **Languages:** Markdown, JSON, JavaScript, HTML, CSS, TypeScript
 - **Branch:** main
 
 ### Key Dependencies
+- `@fastify/static`: `^7.0.4`
 - `dotenv`: `^16.4.5`
 - `fastify`: `^4.28.1`
 
 ### Module Structure
 #### TypeScript/JavaScript Modules
+- `public/app.js`:
 - `src/config.ts`:
   - **Exports:** `config`
 - `src/connectors/antigravity.test.ts`:
@@ -45,10 +47,6 @@ This document contains an optimized summary of the project context for LLMs.
 
 ### Open Tasks
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs *(Phase 2 — Connector Layer Implementation)*
-- [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design) *(Phase 4 — Visual Dashboard (Frontend))*
-- [ ] Connect dashboard to backend API endpoints *(Phase 4 — Visual Dashboard (Frontend))*
-- [ ] Implement visual graphs/charts for consumption timeline and reset alerts *(Phase 4 — Visual Dashboard (Frontend))*
-- [ ] Ensure responsive design, dark mode, and high visual excellence *(Phase 4 — Visual Dashboard (Frontend))*
 - [ ] Perform integration testing for the local daemon and external APIs *(Phase 5 — Quality Assurance & Refactoring)*
 - [ ] Execute lighthouse/performance checks and accessibility audit (A11y) *(Phase 5 — Quality Assurance & Refactoring)*
 - [ ] Refactor and optimize local daemon startup time and memory footprint *(Phase 5 — Quality Assurance & Refactoring)*

@@ -4,6 +4,10 @@ This document provides a structured overview of the project's source modules.
 
 ## TypeScript / JavaScript Modules
 
+### [public/app.js](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/public/app.js)
+- **Exports:** *none*
+- **Functions:** `escapeHtml`, `titleCase`, `clamp`, `getQuotaPercent`, `formatNumber`, `formatFriendlyDuration`, `normalizeProviderEntry`, `normalizeProviders`, `fetchJson`, `loadProviderDetails`, `renderStats`, `renderRecommendations`, `renderRecommendationSlot`, `renderProviders`, `renderProviderCard`, `renderModel`, `setLoading`, `setConnectionState`, `showError`, `refreshDashboard`
+
 ### [src/config.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/config.ts)
 - **Exports:** `config`
 - **Imports from:** `dotenv`
@@ -65,7 +69,7 @@ This document provides a structured overview of the project's source modules.
 
 ### [src/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.ts)
 - **Exports:** *none*
-- **Imports from:** `fastify`, `./config`, `./connectors`, `./routes/providers`
+- **Imports from:** `fastify`, `@fastify/static`, `path`, `./config`, `./connectors`, `./routes/providers`
 
 ### [src/routes/providers.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/routes/providers.test.ts)
 - **Exports:** *none*

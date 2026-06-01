@@ -1,4 +1,6 @@
 import Fastify from 'fastify';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import { config } from './config';
 import { initializeConnectors } from './connectors';
 import { providersRoutes } from './routes/providers';
@@ -6,6 +8,11 @@ import { providersRoutes } from './routes/providers';
 initializeConnectors();
 
 const server = Fastify({ logger: true });
+
+server.register(fastifyStatic, {
+  root: path.join(__dirname, '../public'),
+  prefix: '/'
+});
 
 server.get('/health', async () => {
   return { status: 'ok' };

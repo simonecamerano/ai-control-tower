@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="AI Control Tower dashboard for monitoring provider quotas, health, resets, and model recommendations.">
+    <title>AI Control Tower</title>
+    <preconnect href="https://fonts.googleapis.com">
+    <preconnect href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M12 2 3.5 6.5v11L12 22l8.5-4.5v-11L12 2Zm0 2.7 5.9 3.1-5.9 3.1-5.9-3.1L12 4.7Zm-6.2 5.2 5 2.7v6.1l-5-2.7V9.9Zm7.4 8.8v-6.1l5-2.7V16l-5 2.7Z"></path>
+            </svg>
+          </div>
+          <div>
+            <p class="eyebrow">Operations Dashboard</p>
+            <h1>AI Control Tower</h1>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="live-pill" aria-live="polite">
+            <span class="live-dot"></span>
+            <span id="live-status">Live</span>
+          </div>
+          <div class="updated">
+            <span>Last Updated</span>
+            <strong id="last-updated">Never</strong>
+          </div>
+          <button class="refresh-button" id="refresh-button" type="button" aria-label="Refresh dashboard">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.7 6.3A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L13 11h8V3l-3.3 3.3Z"></path>
+            </svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero-grid" aria-label="Dashboard summary">
+          <article class="recommendation-panel neon-panel" aria-live="polite">
+            <div class="section-heading">
+              <p class="eyebrow">Routing Intelligence</p>
+              <h2>Best Match</h2>
+            </div>
+            <div class="recommendation-grid">
+              <div class="recommendation-card primary">
+                <span class="label">Recommended Model</span>
+                <strong id="recommended-model">Loading</strong>
+                <span id="recommended-meta">Checking availability</span>
+              </div>
+              <div class="recommendation-card">
+                <span class="label">Fallback Model</span>
+                <strong id="fallback-model">Loading</strong>
+                <span id="fallback-meta">Checking availability</span>
+              </div>
+            </div>
+          </article>
+
+          <section class="stats-grid" aria-label="Provider statistics">
+            <article class="stat-card">
+              <span>Total Providers</span>
+              <strong id="total-providers">0</strong>
+            </article>
+            <article class="stat-card">
+              <span>Active Models</span>
+              <strong id="active-models">0</strong>
+            </article>
+            <article class="stat-card alert">
+              <span>Critical Alerts</span>
+              <strong id="critical-alerts">0</strong>
+            </article>
+            <article class="stat-card">
+              <span>Next Reset</span>
+              <strong id="next-reset">No reset</strong>
+            </article>
+          </section>
+        </section>
+
+        <section class="content-header">
+          <div>
+            <p class="eyebrow">Provider Fleet</p>
+            <h2>Quota and Health Monitor</h2>
+          </div>
+          <div class="polling-note">
+            <span></span>
+            Polling every 10s
+          </div>
+        </section>
+
+        <section class="providers-grid" id="providers-grid" aria-live="polite">
+          <article class="provider-card skeleton">
+            <div class="skeleton-line wide"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-bar"></div>
+            <div class="skeleton-bar short"></div>
+          </article>
+          <article class="provider-card skeleton">
+            <div class="skeleton-line wide"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-bar"></div>
+            <div class="skeleton-bar short"></div>
+          </article>
+        </section>
+
+        <div class="toast" id="error-toast" role="status" aria-live="polite"></div>
+      </main>
+    </div>
+  </body>
+</html>

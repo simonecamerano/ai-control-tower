@@ -21,10 +21,10 @@
 - [x] Implement caching mechanism for provider status to prevent self-rate-limiting
 
 ## Phase 4 — Visual Dashboard (Frontend)
-- [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design)
-- [ ] Connect dashboard to backend API endpoints
-- [ ] Implement visual graphs/charts for consumption timeline and reset alerts
-- [ ] Ensure responsive design, dark mode, and high visual excellence
+- [x] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design)
+- [x] Connect dashboard to backend API endpoints
+- [x] Implement visual graphs/charts for consumption timeline and reset alerts
+- [x] Ensure responsive design, dark mode, and high visual excellence
 
 ## Phase 5 — Quality Assurance & Refactoring
 - [ ] Perform integration testing for the local daemon and external APIs

@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `c5e6fe9 feat: implement TTL-based caching in BaseConnector and update derived classes to use protected fetchMetricsRaw method`
 - `7b84099 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `fd976b1 feat: implement provider health and model matching API endpoints with associated tests`
@@ -21,7 +22,7 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 10/18 tasks completed (56%)
+**Progress:** 14/18 tasks completed (78%)
 
 ### Phase 1 — Project setup & Architecture Definition
 - [x] Initialize TypeScript, Fastify/Express backend project setup
@@ -41,10 +42,10 @@ No TODO or FIXME comments found in the code.
 - [x] Implement caching mechanism for provider status to prevent self-rate-limiting
 
 ### Phase 4 — Visual Dashboard (Frontend)
-- [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design)
-- [ ] Connect dashboard to backend API endpoints
-- [ ] Implement visual graphs/charts for consumption timeline and reset alerts
-- [ ] Ensure responsive design, dark mode, and high visual excellence
+- [x] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design)
+- [x] Connect dashboard to backend API endpoints
+- [x] Implement visual graphs/charts for consumption timeline and reset alerts
+- [x] Ensure responsive design, dark mode, and high visual excellence
 
 ### Phase 5 — Quality Assurance & Refactoring
 - [ ] Perform integration testing for the local daemon and external APIs
