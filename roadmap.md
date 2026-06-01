@@ -4,10 +4,10 @@
 > Group tasks under `##` phase headings. ContextForge tracks progress automatically in active-context.md.
 
 ## Phase 1 — Project setup & Architecture Definition
-- [ ] Initialize TypeScript, Fastify/Express backend project setup
-- [ ] Set up testing framework (Vitest) and basic configuration
-- [ ] Define shared TypeScript interfaces for normalized provider metrics
-- [ ] Implement configuration manager to load API keys and endpoints securely (e.g., dotenv)
+- [x] Initialize TypeScript, Fastify/Express backend project setup
+- [x] Set up testing framework (Vitest) and basic configuration
+- [x] Define shared TypeScript interfaces for normalized provider metrics
+- [x] Implement configuration manager to load API keys and endpoints securely (e.g., dotenv)
 
 ## Phase 2 — Connector Layer Implementation
 - [ ] Create base Connector class/interface and factory pattern

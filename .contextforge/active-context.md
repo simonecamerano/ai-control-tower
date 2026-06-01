@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `f5872b2 docs: define comprehensive project roadmap and task tracking in context files`
 - `c3acbbd chore: initialize project structure with context management, model routing rules, and base configuration files`
 
 ## Active Tasks in Code (TODO / FIXME)
@@ -14,13 +15,13 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 0/18 tasks completed (0%)
+**Progress:** 4/18 tasks completed (22%)
 
 ### Phase 1 — Project setup & Architecture Definition
-- [ ] Initialize TypeScript, Fastify/Express backend project setup
-- [ ] Set up testing framework (Vitest) and basic configuration
-- [ ] Define shared TypeScript interfaces for normalized provider metrics
-- [ ] Implement configuration manager to load API keys and endpoints securely (e.g., dotenv)
+- [x] Initialize TypeScript, Fastify/Express backend project setup
+- [x] Set up testing framework (Vitest) and basic configuration
+- [x] Define shared TypeScript interfaces for normalized provider metrics
+- [x] Implement configuration manager to load API keys and endpoints securely (e.g., dotenv)
 
 ### Phase 2 — Connector Layer Implementation
 - [ ] Create base Connector class/interface and factory pattern

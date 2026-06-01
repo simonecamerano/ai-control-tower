@@ -4,14 +4,23 @@ This document contains an optimized summary of the project context for LLMs.
 
 ## Project Overview
 - **Project:** ai-control-tower
-- **Languages:** Markdown
+- **Languages:** Markdown, JSON, TypeScript
 - **Branch:** main
 
+### Key Dependencies
+- `dotenv`: `^16.4.5`
+- `fastify`: `^4.28.1`
+
+### Module Structure
+#### TypeScript/JavaScript Modules
+- `src/config.ts`:
+  - **Exports:** `config`
+- `src/index.test.ts`:
+- `src/index.ts`:
+- `src/types/index.ts`:
+- `vitest.config.ts`:
+
 ### Open Tasks
-- [ ] Initialize TypeScript, Fastify/Express backend project setup *(Phase 1 — Project setup & Architecture Definition)*
-- [ ] Set up testing framework (Vitest) and basic configuration *(Phase 1 — Project setup & Architecture Definition)*
-- [ ] Define shared TypeScript interfaces for normalized provider metrics *(Phase 1 — Project setup & Architecture Definition)*
-- [ ] Implement configuration manager to load API keys and endpoints securely (e.g., dotenv) *(Phase 1 — Project setup & Architecture Definition)*
 - [ ] Create base Connector class/interface and factory pattern *(Phase 2 — Connector Layer Implementation)*
 - [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client) *(Phase 2 — Connector Layer Implementation)*
 - [ ] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing *(Phase 2 — Connector Layer Implementation)*
