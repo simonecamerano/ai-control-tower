@@ -27,6 +27,6 @@
 - [x] Ensure responsive design, dark mode, and high visual excellence
 
 ## Phase 5 — Quality Assurance & Refactoring
-- [ ] Perform integration testing for the local daemon and external APIs
-- [ ] Execute lighthouse/performance checks and accessibility audit (A11y)
-- [ ] Refactor and optimize local daemon startup time and memory footprint
+- [x] Perform integration testing for the local daemon and external APIs
+- [x] Execute lighthouse/performance checks and accessibility audit (A11y)
+- [x] Refactor and optimize local daemon startup time and memory footprint

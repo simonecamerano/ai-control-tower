@@ -65,8 +65,3 @@ This document contains an optimized summary of the project context for LLMs.
 - `src/types/index.ts`:
 - `vitest.config.ts`:
 
-### Open Tasks
-- [ ] Perform integration testing for the local daemon and external APIs *(Phase 5 — Quality Assurance & Refactoring)*
-- [ ] Execute lighthouse/performance checks and accessibility audit (A11y) *(Phase 5 — Quality Assurance & Refactoring)*
-- [ ] Refactor and optimize local daemon startup time and memory footprint *(Phase 5 — Quality Assurance & Refactoring)*
-

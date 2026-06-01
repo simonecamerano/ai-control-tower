@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `533512a feat: add Codex connector to monitor usage and rate limits`
 - `4078cbd feat: implement Claude, Copilot, DeepSeek, and Tavily connectors with unit tests and register them in the factory`
 - `1ca6df1 feat: implement Claude connector and add cache invalidation method to base class`
 - `8bf13fc feat: implement Tavily and DeepSeek API connectors with dedicated unit tests`
@@ -15,7 +16,6 @@
 - `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `fd976b1 feat: implement provider health and model matching API endpoints with associated tests`
 - `72695b9 feat: implement mock connectors for external AI providers and integrate them into the application startup sequence`
-- `b514c26 feat: implement base Connector class and registry factory pattern`
 
 ## Active Tasks in Code (TODO / FIXME)
 
@@ -23,7 +23,7 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 15/18 tasks completed (83%)
+**Progress:** 18/18 tasks completed (100%)
 
 ### Phase 1 — Project setup & Architecture Definition
 - [x] Initialize TypeScript, Fastify/Express backend project setup
@@ -49,7 +49,7 @@ No TODO or FIXME comments found in the code.
 - [x] Ensure responsive design, dark mode, and high visual excellence
 
 ### Phase 5 — Quality Assurance & Refactoring
-- [ ] Perform integration testing for the local daemon and external APIs
-- [ ] Execute lighthouse/performance checks and accessibility audit (A11y)
-- [ ] Refactor and optimize local daemon startup time and memory footprint
+- [x] Perform integration testing for the local daemon and external APIs
+- [x] Execute lighthouse/performance checks and accessibility audit (A11y)
+- [x] Refactor and optimize local daemon startup time and memory footprint
 
