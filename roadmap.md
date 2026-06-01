@@ -16,8 +16,8 @@
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs
 
 ## Phase 3 — API Development for AI Orchestrators
-- [ ] Implement `GET /v1/status` endpoint for overall health metrics
-- [ ] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs
+- [x] Implement `GET /v1/status` endpoint for overall health metrics
+- [x] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs
 - [ ] Implement caching mechanism for provider status to prevent self-rate-limiting
 
 ## Phase 4 — Visual Dashboard (Frontend)

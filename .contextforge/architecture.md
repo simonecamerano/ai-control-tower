@@ -47,7 +47,16 @@ This document provides a structured overview of the project's source modules.
 
 ### [src/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.ts)
 - **Exports:** *none*
-- **Imports from:** `fastify`, `./config`, `./connectors`
+- **Imports from:** `fastify`, `./config`, `./connectors`, `./routes/providers`
+
+### [src/routes/providers.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/routes/providers.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `fastify`, `../connectors`, `./providers`
+
+### [src/routes/providers.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/routes/providers.ts)
+- **Exports:** `providersRoutes`
+- **Functions:** `providersRoutes`
+- **Imports from:** `fastify`, `../connectors/factory`, `../types`
 
 ### [src/types/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/types/index.ts)
 - **Exports:** *none*

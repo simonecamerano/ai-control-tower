@@ -31,14 +31,15 @@ This document contains an optimized summary of the project context for LLMs.
   - **Classes:** `MockConnector`
 - `src/index.test.ts`:
 - `src/index.ts`:
+- `src/routes/providers.test.ts`:
+- `src/routes/providers.ts`:
+  - **Exports:** `providersRoutes`
 - `src/types/index.ts`:
 - `vitest.config.ts`:
 
 ### Open Tasks
 - [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client) *(Phase 2 — Connector Layer Implementation)*
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs *(Phase 2 — Connector Layer Implementation)*
-- [ ] Implement `GET /v1/status` endpoint for overall health metrics *(Phase 3 — API Development for AI Orchestrators)*
-- [ ] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs *(Phase 3 — API Development for AI Orchestrators)*
 - [ ] Implement caching mechanism for provider status to prevent self-rate-limiting *(Phase 3 — API Development for AI Orchestrators)*
 - [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design) *(Phase 4 — Visual Dashboard (Frontend))*
 - [ ] Connect dashboard to backend API endpoints *(Phase 4 — Visual Dashboard (Frontend))*

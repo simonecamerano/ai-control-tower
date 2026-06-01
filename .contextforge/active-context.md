@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `72695b9 feat: implement mock connectors for external AI providers and integrate them into the application startup sequence`
 - `b514c26 feat: implement base Connector class and registry factory pattern`
 - `bf0dca2 feat: initialize TypeScript backend project with Fastify, Vitest, and shared metrics interfaces`
 - `f5872b2 docs: define comprehensive project roadmap and task tracking in context files`
@@ -17,7 +18,7 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 6/18 tasks completed (33%)
+**Progress:** 8/18 tasks completed (44%)
 
 ### Phase 1 — Project setup & Architecture Definition
 - [x] Initialize TypeScript, Fastify/Express backend project setup
@@ -32,8 +33,8 @@ No TODO or FIXME comments found in the code.
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs
 
 ### Phase 3 — API Development for AI Orchestrators
-- [ ] Implement `GET /v1/status` endpoint for overall health metrics
-- [ ] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs
+- [x] Implement `GET /v1/status` endpoint for overall health metrics
+- [x] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs
 - [ ] Implement caching mechanism for provider status to prevent self-rate-limiting
 
 ### Phase 4 — Visual Dashboard (Frontend)
