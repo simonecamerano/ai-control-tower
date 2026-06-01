@@ -6,7 +6,7 @@ export class MockConnector extends BaseConnector {
     super(provider);
   }
 
-  async fetchMetrics(): Promise<ProviderMetrics> {
+  protected async fetchMetricsRaw(): Promise<ProviderMetrics> {
     const provider = this.getProviderName();
     const currentTimestamp = new Date().toISOString();
     let metrics: ProviderMetrics;

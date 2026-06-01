@@ -16,15 +16,21 @@ This document provides a structured overview of the project's source modules.
 ### [src/connectors/antigravity.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/antigravity.ts)
 - **Exports:** `AntigravityConnector`
 - **Classes:**
-  - `AntigravityConnector` (Methods: `fetchMetrics`)
+  - `AntigravityConnector` (Methods: `fetchMetricsRaw`)
 - **Functions:** `normalizeModelId`, `toIsoString`, `findLanguageServerProcess`, `findProcessPort`
 - **Imports from:** `child_process`, `./base`, `../types`
 
 ### [src/connectors/base.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/base.ts)
 - **Exports:** `BaseConnector`
 - **Classes:**
-  - `BaseConnector` (Methods: `getProviderName`, `fetchMetrics`)
+  - `BaseConnector` (Methods: `getProviderName`, `fetchMetrics`, `fetchMetricsRaw`)
 - **Imports from:** `../types`
+
+### [src/connectors/cache.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/cache.test.ts)
+- **Exports:** *none*
+- **Classes:**
+  - `TestCacheConnector` (Methods: `fetchMetricsRaw`)
+- **Imports from:** `vitest`, `./base`, `../types`
 
 ### [src/connectors/factory.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/factory.test.ts)
 - **Exports:** *none*
@@ -50,7 +56,7 @@ This document provides a structured overview of the project's source modules.
 ### [src/connectors/mock.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/mock.ts)
 - **Exports:** `MockConnector`
 - **Classes:**
-  - `MockConnector` (Methods: `fetchMetrics`)
+  - `MockConnector` (Methods: `fetchMetricsRaw`)
 - **Imports from:** `./base`, `../types`
 
 ### [src/index.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.test.ts)

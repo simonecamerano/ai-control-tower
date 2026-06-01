@@ -6,6 +6,7 @@
 
 ## Recent 10 Commits
 
+- `7b84099 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `fd976b1 feat: implement provider health and model matching API endpoints with associated tests`
 - `72695b9 feat: implement mock connectors for external AI providers and integrate them into the application startup sequence`
@@ -20,7 +21,7 @@ No TODO or FIXME comments found in the code.
 
 ## Roadmap
 
-**Progress:** 9/18 tasks completed (50%)
+**Progress:** 10/18 tasks completed (56%)
 
 ### Phase 1 — Project setup & Architecture Definition
 - [x] Initialize TypeScript, Fastify/Express backend project setup
@@ -37,7 +38,7 @@ No TODO or FIXME comments found in the code.
 ### Phase 3 — API Development for AI Orchestrators
 - [x] Implement `GET /v1/status` endpoint for overall health metrics
 - [x] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs
-- [ ] Implement caching mechanism for provider status to prevent self-rate-limiting
+- [x] Implement caching mechanism for provider status to prevent self-rate-limiting
 
 ### Phase 4 — Visual Dashboard (Frontend)
 - [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design)

@@ -22,6 +22,8 @@ This document contains an optimized summary of the project context for LLMs.
 - `src/connectors/base.ts`:
   - **Exports:** `BaseConnector`
   - **Classes:** `BaseConnector`
+- `src/connectors/cache.test.ts`:
+  - **Classes:** `TestCacheConnector`
 - `src/connectors/factory.test.ts`:
   - **Classes:** `TestConnector`
 - `src/connectors/factory.ts`:
@@ -43,7 +45,6 @@ This document contains an optimized summary of the project context for LLMs.
 
 ### Open Tasks
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs *(Phase 2 — Connector Layer Implementation)*
-- [ ] Implement caching mechanism for provider status to prevent self-rate-limiting *(Phase 3 — API Development for AI Orchestrators)*
 - [ ] Initialize a modern single-page dashboard UI (Tailwind or custom CSS with glassmorphism design) *(Phase 4 — Visual Dashboard (Frontend))*
 - [ ] Connect dashboard to backend API endpoints *(Phase 4 — Visual Dashboard (Frontend))*
 - [ ] Implement visual graphs/charts for consumption timeline and reset alerts *(Phase 4 — Visual Dashboard (Frontend))*

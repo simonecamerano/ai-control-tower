@@ -2,14 +2,31 @@ import { ProviderMetrics } from '../types';
 
 export abstract class BaseConnector {
   private providerName: string;
+  private cachedMetrics: ProviderMetrics | null = null;
+  private cacheTtlMs: number;
 
-  constructor(providerName: string) {
+  constructor(providerName: string, cacheTtlMs: number = 15000) {
     this.providerName = providerName;
+    this.cacheTtlMs = cacheTtlMs;
   }
 
   public getProviderName(): string {
     return this.providerName;
   }
 
-  public abstract fetchMetrics(): Promise<ProviderMetrics>;
+  public async fetchMetrics(): Promise<ProviderMetrics> {
+    const now = Date.now();
+    if (
+      this.cachedMetrics &&
+      now - new Date(this.cachedMetrics.lastUpdatedAt).getTime() < this.cacheTtlMs
+    ) {
+      return this.cachedMetrics;
+    }
+
+    const freshMetrics = await this.fetchMetricsRaw();
+    this.cachedMetrics = freshMetrics;
+    return freshMetrics;
+  }
+
+  protected abstract fetchMetricsRaw(): Promise<ProviderMetrics>;
 }

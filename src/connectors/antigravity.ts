@@ -74,7 +74,7 @@ export class AntigravityConnector extends BaseConnector {
     super('antigravity');
   }
 
-  public async fetchMetrics(): Promise<ProviderMetrics> {
+  protected async fetchMetricsRaw(): Promise<ProviderMetrics> {
     const now = new Date().toISOString();
     const errorResult: ProviderMetrics = {
       provider: 'antigravity',
