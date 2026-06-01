@@ -6,6 +6,7 @@ export const config = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   CLAUDE_API_KEY: process.env.CLAUDE_API_KEY || '',
   DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY || '',
+  DEEPSEEK_PLATFORM_TOKEN: process.env.DEEPSEEK_PLATFORM_TOKEN || '',
   COPILOT_API_KEY: process.env.COPILOT_API_KEY || '',
   COPILOT_SESSION_COOKIE: process.env.COPILOT_SESSION_COOKIE || '',
   TAVILY_API_KEY: process.env.TAVILY_API_KEY || '',

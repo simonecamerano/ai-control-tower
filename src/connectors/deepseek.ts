@@ -2,16 +2,6 @@ import { config } from '../config';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus } from '../types';
 
-/**
- * Connector for DeepSeek.
- *
- * Queries the DeepSeek balance API (`GET /user/balance`) to derive credit
- * usage. Requires `DEEPSEEK_API_KEY`; returns `inactive` when the key is
- * absent.
- *
- * DeepSeek credits are shared across all models, so the same quota object is
- * attached to each model entry.
- */
 export class DeepSeekConnector extends BaseConnector {
   constructor() {
     super('deepseek');
@@ -40,70 +30,75 @@ export class DeepSeekConnector extends BaseConnector {
     };
 
     try {
-      const response = await fetch('https://api.deepseek.com/user/balance', {
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${config.DEEPSEEK_API_KEY}`
-        }
-      });
+      const [balanceRes, costRes] = await Promise.all([
+        fetch('https://api.deepseek.com/user/balance', {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${config.DEEPSEEK_API_KEY}`
+          }
+        }),
+        config.DEEPSEEK_PLATFORM_TOKEN
+          ? fetch(`https://platform.deepseek.com/api/v0/usage/cost?month=${new Date().getMonth() + 1}&year=${new Date().getFullYear()}`, {
+              headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${config.DEEPSEEK_PLATFORM_TOKEN}`,
+                'x-app-version': '1.0.0'
+              }
+            })
+          : Promise.resolve(null)
+      ]);
 
-      if (!response.ok) {
-        return errorResult;
-      }
+      if (!balanceRes.ok) return errorResult;
 
-      const data = await response.json();
+      const balanceData = await balanceRes.json();
+      if (!balanceData.balance_infos?.length) return errorResult;
 
-      if (!data.balance_infos || data.balance_infos.length === 0) {
-        return errorResult;
-      }
+      const info = balanceData.balance_infos[0];
+      const toppedUp = parseFloat(info.topped_up_balance || '0');
+      const granted = parseFloat(info.granted_balance || '0');
+      const totalBalance = toppedUp + granted;
+      const remaining = parseFloat(info.total_balance || '0');
+      const usedBalance = Number((totalBalance - remaining).toFixed(4));
 
-      const balanceInfo = data.balance_infos[0];
-      // DeepSeek tracks two credit pools: purchased top-ups and granted (promotional) credits.
-      // Their sum is the effective total budget.
-      const totalBalance = parseFloat(balanceInfo.topped_up_balance || '0') + parseFloat(balanceInfo.granted_balance || '0');
-      const remainingBalance = parseFloat(balanceInfo.total_balance || '0');
-      // Limit floating-point drift to 4 decimal places when computing consumed credits.
-      const usedBalance = Number((totalBalance - remainingBalance).toFixed(4));
-
-      // Prefer the explicit `is_available` flag; fall back to a balance check.
-      const isAvailable = data.is_available ?? (remainingBalance > 0);
+      const isAvailable = balanceData.is_available ?? (remaining > 0);
       let health: HealthStatus = 'OK';
-      if (!isAvailable || remainingBalance <= 0) {
-        health = 'BLOCKED';
-      } else if (remainingBalance < 1.0) {
-        health = 'CRITICAL';
-      } else if (remainingBalance < 5.0) {
-        health = 'WARNING';
+      if (!isAvailable || remaining <= 0) health = 'BLOCKED';
+      else if (remaining < 1.0) health = 'CRITICAL';
+      else if (remaining < 5.0) health = 'WARNING';
+
+      // Monthly spend: sum all amounts from the platform cost endpoint.
+      let monthlySpend = 0;
+      if (costRes?.ok) {
+        const costData = await costRes.json();
+        const totals: { usage: { amount: string }[] }[] = costData?.data?.biz_data?.[0]?.total ?? [];
+        for (const model of totals) {
+          for (const entry of model.usage ?? []) {
+            monthlySpend += parseFloat(entry.amount || '0');
+          }
+        }
+        monthlySpend = Number(monthlySpend.toFixed(6));
       }
 
-      const quota = {
-        type: 'credits' as const,
-        total: totalBalance,
-        used: usedBalance,
-        remaining: remainingBalance
-      };
+      const models = [
+        {
+          modelId: 'deepseek-balance',
+          modelName: 'Balance',
+          quota: { type: 'credits' as const, total: totalBalance, used: usedBalance, remaining },
+          resetAt: null
+        },
+        ...(config.DEEPSEEK_PLATFORM_TOKEN ? [{
+          modelId: 'deepseek-monthly',
+          modelName: 'Monthly Spend',
+          quota: { type: 'credits' as const, total: totalBalance, used: monthlySpend, remaining: totalBalance - monthlySpend },
+          resetAt: null
+        }] : [])
+      ];
 
       return {
         provider: 'deepseek',
         status: 'active',
         health,
-        // Expose the shared balance as a top-level globalQuota so dashboards can
-        // display it without iterating over individual model entries.
-        globalQuota: quota,
-        models: [
-          {
-            modelId: 'deepseek-chat',
-            modelName: 'DeepSeek Chat',
-            quota,
-            resetAt: null
-          },
-          {
-            modelId: 'deepseek-coder',
-            modelName: 'DeepSeek Coder',
-            quota,
-            resetAt: null
-          }
-        ],
+        models,
         resetAt: null,
         lastUpdatedAt: now
       };
