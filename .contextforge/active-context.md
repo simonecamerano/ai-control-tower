@@ -6,6 +6,9 @@
 
 ## Recent 10 Commits
 
+- `4464856 feat: add script to identify and test antigravity language server process and ports`
+- `8c26eb5 feat: add DEEPSEEK_API_KEY and TAVILY_API_KEY to environment configuration`
+- `50bba01 docs: add comprehensive JSDoc comments to all connector implementations and factory initialization logic.`
 - `da8f06d fix: correct HTML link tags and complete Phase 5 QA tasks in project documentation`
 - `533512a feat: add Codex connector to monitor usage and rate limits`
 - `4078cbd feat: implement Claude, Copilot, DeepSeek, and Tavily connectors with unit tests and register them in the factory`
@@ -13,9 +16,6 @@
 - `8bf13fc feat: implement Tavily and DeepSeek API connectors with dedicated unit tests`
 - `1c24f3c feat: initialize and style frontend dashboard with dynamic health tracking and metrics visualization`
 - `c5e6fe9 feat: implement TTL-based caching in BaseConnector and update derived classes to use protected fetchMetricsRaw method`
-- `7b84099 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
-- `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
-- `fd976b1 feat: implement provider health and model matching API endpoints with associated tests`
 
 ## Active Tasks in Code (TODO / FIXME)
 

@@ -8,6 +8,10 @@ This document provides a structured overview of the project's source modules.
 - **Exports:** *none*
 - **Functions:** `escapeHtml`, `titleCase`, `clamp`, `getQuotaPercent`, `formatNumber`, `formatFriendlyDuration`, `normalizeProviderEntry`, `normalizeProviders`, `fetchJson`, `loadProviderDetails`, `renderStats`, `renderRecommendations`, `renderRecommendationSlot`, `renderProviders`, `renderProviderCard`, `renderModel`, `setLoading`, `setConnectionState`, `showError`, `refreshDashboard`
 
+### [scratch/test-antigravity.js](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/scratch/test-antigravity.js)
+- **Exports:** *none*
+- **Functions:** `findLanguageServerProcess`, `findProcessPorts`, `testPort`, `main`
+
 ### [src/config.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/config.ts)
 - **Exports:** `config`
 - **Imports from:** `dotenv`
@@ -21,7 +25,7 @@ This document provides a structured overview of the project's source modules.
 - **Exports:** `AntigravityConnector`
 - **Classes:**
   - `AntigravityConnector` (Methods: `fetchMetricsRaw`)
-- **Functions:** `normalizeModelId`, `toIsoString`, `findLanguageServerProcess`, `findProcessPort`
+- **Functions:** `normalizeModelId`, `toIsoString`, `findLanguageServerProcess`, `findProcessPorts`
 - **Imports from:** `child_process`, `./base`, `../types`
 
 ### [src/connectors/base.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/base.ts)

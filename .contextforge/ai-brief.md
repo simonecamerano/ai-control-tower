@@ -15,6 +15,7 @@ This document contains an optimized summary of the project context for LLMs.
 ### Module Structure
 #### TypeScript/JavaScript Modules
 - `public/app.js`:
+- `scratch/test-antigravity.js`:
 - `src/config.ts`:
   - **Exports:** `config`
 - `src/connectors/antigravity.test.ts`:
