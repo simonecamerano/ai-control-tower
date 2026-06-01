@@ -6,6 +6,9 @@
 
 ## Recent 10 Commits
 
+- `1ca6df1 feat: implement Claude connector and add cache invalidation method to base class`
+- `8bf13fc feat: implement Tavily and DeepSeek API connectors with dedicated unit tests`
+- `1c24f3c feat: initialize and style frontend dashboard with dynamic health tracking and metrics visualization`
 - `c5e6fe9 feat: implement TTL-based caching in BaseConnector and update derived classes to use protected fetchMetricsRaw method`
 - `7b84099 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
 - `95edde9 feat: implement AntigravityConnector to retrieve language server metrics via local process inspection`
@@ -13,8 +16,6 @@
 - `72695b9 feat: implement mock connectors for external AI providers and integrate them into the application startup sequence`
 - `b514c26 feat: implement base Connector class and registry factory pattern`
 - `bf0dca2 feat: initialize TypeScript backend project with Fastify, Vitest, and shared metrics interfaces`
-- `f5872b2 docs: define comprehensive project roadmap and task tracking in context files`
-- `c3acbbd chore: initialize project structure with context management, model routing rules, and base configuration files`
 
 ## Active Tasks in Code (TODO / FIXME)
 

@@ -26,6 +26,18 @@ This document contains an optimized summary of the project context for LLMs.
   - **Classes:** `BaseConnector`
 - `src/connectors/cache.test.ts`:
   - **Classes:** `TestCacheConnector`
+- `src/connectors/claude.test.ts`:
+- `src/connectors/claude.ts`:
+  - **Exports:** `ClaudeConnector`
+  - **Classes:** `ClaudeConnector`
+- `src/connectors/copilot.test.ts`:
+- `src/connectors/copilot.ts`:
+  - **Exports:** `CopilotConnector`
+  - **Classes:** `CopilotConnector`
+- `src/connectors/deepseek.test.ts`:
+- `src/connectors/deepseek.ts`:
+  - **Exports:** `DeepSeekConnector`
+  - **Classes:** `DeepSeekConnector`
 - `src/connectors/factory.test.ts`:
   - **Classes:** `TestConnector`
 - `src/connectors/factory.ts`:
@@ -37,6 +49,10 @@ This document contains an optimized summary of the project context for LLMs.
 - `src/connectors/mock.ts`:
   - **Exports:** `MockConnector`
   - **Classes:** `MockConnector`
+- `src/connectors/tavily.test.ts`:
+- `src/connectors/tavily.ts`:
+  - **Exports:** `TavilyConnector`
+  - **Classes:** `TavilyConnector`
 - `src/index.test.ts`:
 - `src/index.ts`:
 - `src/routes/providers.test.ts`:

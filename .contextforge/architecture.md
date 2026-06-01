@@ -27,7 +27,7 @@ This document provides a structured overview of the project's source modules.
 ### [src/connectors/base.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/base.ts)
 - **Exports:** `BaseConnector`
 - **Classes:**
-  - `BaseConnector` (Methods: `getProviderName`, `fetchMetrics`, `fetchMetricsRaw`)
+  - `BaseConnector` (Methods: `getProviderName`, `fetchMetrics`, `clearCache`, `fetchMetricsRaw`)
 - **Imports from:** `../types`
 
 ### [src/connectors/cache.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/cache.test.ts)
@@ -36,10 +36,40 @@ This document provides a structured overview of the project's source modules.
   - `TestCacheConnector` (Methods: `fetchMetricsRaw`)
 - **Imports from:** `vitest`, `./base`, `../types`
 
+### [src/connectors/claude.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/claude.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `./claude`, `../config`
+
+### [src/connectors/claude.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/claude.ts)
+- **Exports:** `ClaudeConnector`
+- **Classes:**
+  - `ClaudeConnector` (Methods: `fetchMetricsRaw`)
+- **Imports from:** `./base`, `../types`, `../config`
+
+### [src/connectors/copilot.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/copilot.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `./copilot`, `../config`
+
+### [src/connectors/copilot.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/copilot.ts)
+- **Exports:** `CopilotConnector`
+- **Classes:**
+  - `CopilotConnector` (Methods: `fetchMetricsRaw`)
+- **Imports from:** `../config`, `./base`, `../types`
+
+### [src/connectors/deepseek.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/deepseek.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `./deepseek`, `../config`
+
+### [src/connectors/deepseek.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/deepseek.ts)
+- **Exports:** `DeepSeekConnector`
+- **Classes:**
+  - `DeepSeekConnector` (Methods: `fetchMetricsRaw`)
+- **Imports from:** `../config`, `./base`, `../types`
+
 ### [src/connectors/factory.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/factory.test.ts)
 - **Exports:** *none*
 - **Classes:**
-  - `TestConnector` (Methods: `fetchMetrics`)
+  - `TestConnector` (Methods: `fetchMetricsRaw`)
 - **Imports from:** `vitest`, `./factory`, `./base`, `../types`
 
 ### [src/connectors/factory.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/factory.ts)
@@ -51,7 +81,7 @@ This document provides a structured overview of the project's source modules.
 ### [src/connectors/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/index.ts)
 - **Exports:** `initializeConnectors`
 - **Functions:** `initializeConnectors`
-- **Imports from:** `./factory`, `./mock`, `./antigravity`
+- **Imports from:** `./factory`, `./mock`, `./antigravity`, `./deepseek`, `./tavily`, `./claude`, `./copilot`
 
 ### [src/connectors/mock.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/mock.test.ts)
 - **Exports:** *none*
@@ -63,6 +93,16 @@ This document provides a structured overview of the project's source modules.
   - `MockConnector` (Methods: `fetchMetricsRaw`)
 - **Imports from:** `./base`, `../types`
 
+### [src/connectors/tavily.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/tavily.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `./tavily`, `../config`
+
+### [src/connectors/tavily.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/tavily.ts)
+- **Exports:** `TavilyConnector`
+- **Classes:**
+  - `TavilyConnector` (Methods: `fetchMetricsRaw`)
+- **Imports from:** `../config`, `./base`, `../types`
+
 ### [src/index.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.test.ts)
 - **Exports:** *none*
 - **Imports from:** `vitest`
@@ -73,7 +113,7 @@ This document provides a structured overview of the project's source modules.
 
 ### [src/routes/providers.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/routes/providers.test.ts)
 - **Exports:** *none*
-- **Imports from:** `vitest`, `fastify`, `../connectors`, `./providers`
+- **Imports from:** `vitest`, `fastify`, `../connectors`, `../connectors/factory`, `./providers`, `../config`
 
 ### [src/routes/providers.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/routes/providers.ts)
 - **Exports:** `providersRoutes`
