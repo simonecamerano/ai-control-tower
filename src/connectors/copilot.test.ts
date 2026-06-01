@@ -3,29 +3,34 @@ import { CopilotConnector } from './copilot';
 import { config } from '../config';
 
 describe('CopilotConnector', () => {
-  const originalApiKey = config.COPILOT_API_KEY;
+  const originalSessionCookie = config.COPILOT_SESSION_COOKIE;
   const originalFetch = global.fetch;
 
   afterEach(() => {
-    config.COPILOT_API_KEY = originalApiKey;
+    config.COPILOT_SESSION_COOKIE = originalSessionCookie;
     global.fetch = originalFetch;
     vi.restoreAllMocks();
   });
 
-  test('should return inactive status if COPILOT_API_KEY is not present', async () => {
-    config.COPILOT_API_KEY = '';
+  test('should return inactive status if COPILOT_SESSION_COOKIE is not present', async () => {
+    config.COPILOT_SESSION_COOKIE = '';
     const connector = new CopilotConnector();
     const result = await connector.fetchMetrics();
     expect(result.status).toBe('inactive');
   });
 
   test('should parse successful usage response correctly', async () => {
-    config.COPILOT_API_KEY = 'test-key';
+    config.COPILOT_SESSION_COOKIE = 'session=test-session-cookie';
     const mockApiResponse = {
-      premium_interactions_total: 600,
-      premium_interactions_used: 150,
-      premium_interactions_remaining: 450,
-      subscription_reset_date: '2026-06-15T00:00:00.000Z'
+      licenseType: 'licensed_full',
+      quotas: {
+        limits: { premiumInteractions: 300 },
+        remaining: { premiumInteractions: 150, chatPercentage: 50.0, premiumInteractionsPercentage: 50.0 },
+        resetDate: '2026-07-01',
+        resetDateUtc: '2026-07-01T00:00:00.000Z',
+        overagesEnabled: false
+      },
+      plan: 'pro'
     };
 
     const mockFetch = vi.fn().mockResolvedValue({
@@ -41,18 +46,18 @@ describe('CopilotConnector', () => {
     expect(result.status).toBe('active');
     expect(result.health).toBe('OK');
     expect(result.models).toHaveLength(1);
-    expect(result.models[0].modelId).toBe('copilot-chat');
+    expect(result.models[0].modelId).toBe('copilot-premium-interactions');
     expect(result.models[0].quota).toEqual({
       type: 'requests',
-      total: 600,
+      total: 300,
       used: 150,
-      remaining: 450
+      remaining: 150
     });
-    expect(result.models[0].resetAt).toBe('2026-06-15T00:00:00.000Z');
+    expect(result.models[0].resetAt).toBe('2026-07-01T00:00:00.000Z');
   });
 
   test('should return error status and BLOCKED health on failed response', async () => {
-    config.COPILOT_API_KEY = 'test-key';
+    config.COPILOT_SESSION_COOKIE = 'session=test-session-cookie';
 
     const mockFetch = vi.fn().mockRejectedValue(new Error('Network error'));
     global.fetch = mockFetch;

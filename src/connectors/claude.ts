@@ -45,7 +45,7 @@ export class ClaudeConnector extends BaseConnector {
 
     try {
       const response = await fetch(
-        `https://console.anthropic.com/api/organizations/${config.CLAUDE_ORG_ID}/usage`,
+        `https://claude.ai/api/organizations/${config.CLAUDE_ORG_ID}/usage`,
         {
           method: 'GET',
           headers: {

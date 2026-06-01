@@ -2,21 +2,13 @@ import { config } from '../config';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus } from '../types';
 
-/**
- * Connector for GitHub Copilot.
- *
- * Queries the GitHub REST API (`GET /user/copilot`) to retrieve the monthly
- * premium-interaction quota. Requires `COPILOT_API_KEY` (a GitHub personal
- * access token or OAuth token with `copilot` scope); returns `inactive` when
- * the key is absent.
- */
 export class CopilotConnector extends BaseConnector {
   constructor() {
     super('copilot');
   }
 
   protected async fetchMetricsRaw(): Promise<ProviderMetrics> {
-    if (!config.COPILOT_API_KEY) {
+    if (!config.COPILOT_SESSION_COOKIE) {
       return {
         provider: 'copilot',
         status: 'inactive',
@@ -38,11 +30,13 @@ export class CopilotConnector extends BaseConnector {
     };
 
     try {
-      const response = await fetch('https://api.github.com/user/copilot', {
+      const response = await fetch('https://github.com/github-copilot/chat/entitlement', {
+        method: 'GET',
         headers: {
-          'Accept': 'application/vnd.github+json',
-          'Authorization': `Bearer ${config.COPILOT_API_KEY}`,
-          'User-Agent': 'AI-Control-Tower'
+          accept: 'application/json',
+          'github-verified-fetch': 'true',
+          'x-requested-with': 'XMLHttpRequest',
+          Cookie: config.COPILOT_SESSION_COOKIE
         }
       });
 
@@ -52,22 +46,26 @@ export class CopilotConnector extends BaseConnector {
 
       const data = await response.json();
 
-      // Fall back to sensible defaults when the API omits quota fields
-      // (e.g. unlimited plans or API schema changes).
-      const total = typeof data.premium_interactions_total === 'number' ? data.premium_interactions_total : 500;
-      const used = typeof data.premium_interactions_used === 'number' ? data.premium_interactions_used : 0;
-      const remaining = typeof data.premium_interactions_remaining === 'number' ? data.premium_interactions_remaining : (total - used);
+      if (!data.quotas || typeof data.quotas !== 'object') {
+        return errorResult;
+      }
 
-      const quota = {
-        type: 'requests' as const,
-        total,
-        used,
-        remaining
-      };
+      const total: number = typeof data.quotas.limits?.premiumInteractions === 'number'
+        ? data.quotas.limits.premiumInteractions
+        : 300;
+      const remaining: number = typeof data.quotas.remaining?.premiumInteractions === 'number'
+        ? data.quotas.remaining.premiumInteractions
+        : total;
+      const used = Math.max(0, total - remaining);
+      const resetAt: string | null = typeof data.quotas.resetDateUtc === 'string'
+        ? data.quotas.resetDateUtc
+        : null;
 
-      // Guard against division by zero for plans that report total = 0.
-      const health: HealthStatus = remaining <= 0 ? 'BLOCKED' : remaining / (total || 1) < 0.1 ? 'CRITICAL' : remaining / (total || 1) < 0.3 ? 'WARNING' : 'OK';
-      const resetAt = data.subscription_reset_date ? new Date(data.subscription_reset_date).toISOString() : null;
+      const health: HealthStatus =
+        remaining <= 0 ? 'BLOCKED'
+        : remaining / (total || 1) < 0.1 ? 'CRITICAL'
+        : remaining / (total || 1) < 0.3 ? 'WARNING'
+        : 'OK';
 
       return {
         provider: 'copilot',
@@ -75,9 +73,14 @@ export class CopilotConnector extends BaseConnector {
         health,
         models: [
           {
-            modelId: 'copilot-chat',
-            modelName: 'Copilot Chat',
-            quota,
+            modelId: 'copilot-premium-interactions',
+            modelName: 'Copilot Premium Interactions',
+            quota: {
+              type: 'requests',
+              total,
+              used,
+              remaining
+            },
             resetAt
           }
         ],
