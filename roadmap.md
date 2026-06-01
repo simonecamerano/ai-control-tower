@@ -12,7 +12,7 @@
 ## Phase 2 — Connector Layer Implementation
 - [x] Create base Connector class/interface and factory pattern
 - [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client)
-- [ ] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing
+- [x] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs
 
 ## Phase 3 — API Development for AI Orchestrators

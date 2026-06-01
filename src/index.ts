@@ -1,5 +1,8 @@
 import Fastify from 'fastify';
 import { config } from './config';
+import { initializeConnectors } from './connectors';
+
+initializeConnectors();
 
 const server = Fastify({ logger: true });
 

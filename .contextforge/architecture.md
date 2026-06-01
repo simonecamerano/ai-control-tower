@@ -26,13 +26,28 @@ This document provides a structured overview of the project's source modules.
   - `ConnectorFactory` (Methods: `register`, `getConnector`, `getRegisteredProviders`)
 - **Imports from:** `./base`
 
+### [src/connectors/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/index.ts)
+- **Exports:** `initializeConnectors`
+- **Functions:** `initializeConnectors`
+- **Imports from:** `./factory`, `./mock`
+
+### [src/connectors/mock.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/mock.test.ts)
+- **Exports:** *none*
+- **Imports from:** `vitest`, `./mock`
+
+### [src/connectors/mock.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/connectors/mock.ts)
+- **Exports:** `MockConnector`
+- **Classes:**
+  - `MockConnector` (Methods: `fetchMetrics`)
+- **Imports from:** `./base`, `../types`
+
 ### [src/index.test.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.test.ts)
 - **Exports:** *none*
 - **Imports from:** `vitest`
 
 ### [src/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/index.ts)
 - **Exports:** *none*
-- **Imports from:** `fastify`, `./config`
+- **Imports from:** `fastify`, `./config`, `./connectors`
 
 ### [src/types/index.ts](file:///home/simone/Documenti/start2impact/Progetti personali/ai-control-tower/src/types/index.ts)
 - **Exports:** *none*

@@ -23,6 +23,12 @@ This document contains an optimized summary of the project context for LLMs.
 - `src/connectors/factory.ts`:
   - **Exports:** `ConnectorFactory`
   - **Classes:** `ConnectorFactory`
+- `src/connectors/index.ts`:
+  - **Exports:** `initializeConnectors`
+- `src/connectors/mock.test.ts`:
+- `src/connectors/mock.ts`:
+  - **Exports:** `MockConnector`
+  - **Classes:** `MockConnector`
 - `src/index.test.ts`:
 - `src/index.ts`:
 - `src/types/index.ts`:
@@ -30,7 +36,6 @@ This document contains an optimized summary of the project context for LLMs.
 
 ### Open Tasks
 - [ ] Implement Antigravity IDE Connector (process lookup, CSRF token & port extraction, gRPC-Gateway client) *(Phase 2 — Connector Layer Implementation)*
-- [ ] Implement Mock Connectors for external providers (Claude, DeepSeek, Copilot, Tavily, Codex) for development and testing *(Phase 2 — Connector Layer Implementation)*
 - [ ] Replace mock connectors with real integrations using respective dashboard/public APIs *(Phase 2 — Connector Layer Implementation)*
 - [ ] Implement `GET /v1/status` endpoint for overall health metrics *(Phase 3 — API Development for AI Orchestrators)*
 - [ ] Implement `GET /v1/models/best-match` endpoint for dynamic routing based on quota/costs *(Phase 3 — API Development for AI Orchestrators)*
