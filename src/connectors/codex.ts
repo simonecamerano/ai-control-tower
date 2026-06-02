@@ -13,7 +13,14 @@ import { config } from '../config';
  * ("primary" and "secondary") that correspond to short-term burst and
  * longer-term rolling quotas.
  */
+interface PlatformCache {
+  balance: { remaining: number; resetAt: string | null } | null;
+  monthlySpend: number | null;
+}
+
 export class CodexConnector extends BaseConnector {
+  private platformCache: PlatformCache = { balance: null, monthlySpend: null };
+
   constructor() {
     super('codex', 60000);
   }
@@ -142,20 +149,23 @@ export class CodexConnector extends BaseConnector {
         });
       }
 
-      // API credit balance (platform.openai.com)
+      // API credit balance — update cache on success, fall back to last known value on failure
       if (creditsRes?.ok) {
         const creditsData = await creditsRes.json();
         if (typeof creditsData.total_available === 'number') {
           const expiresAt = creditsData.grants?.data?.[0]?.expires_at
             ? new Date(creditsData.grants.data[0].expires_at * 1000).toISOString()
             : null;
-          models.push({
-            modelId: 'codex-balance',
-            modelName: 'API Balance',
-            quota: { type: 'currency', total: 0, used: 0, remaining: creditsData.total_available },
-            resetAt: expiresAt
-          });
+          this.platformCache.balance = { remaining: creditsData.total_available, resetAt: expiresAt };
         }
+      }
+      if (this.platformCache.balance !== null) {
+        models.push({
+          modelId: 'codex-balance',
+          modelName: 'API Balance',
+          quota: { type: 'currency', total: 0, used: 0, remaining: this.platformCache.balance.remaining },
+          resetAt: this.platformCache.balance.resetAt
+        });
       }
 
       // Monthly spend — costs are in USD cents, divide by 100
@@ -165,10 +175,13 @@ export class CodexConnector extends BaseConnector {
         const monthlySpend = dailyCosts
           .flatMap(d => d.line_items ?? [])
           .reduce((sum, item) => sum + (item.cost ?? 0), 0) / 100;
+        this.platformCache.monthlySpend = monthlySpend;
+      }
+      if (this.platformCache.monthlySpend !== null) {
         models.push({
           modelId: 'codex-monthly',
           modelName: 'Monthly Spend',
-          quota: { type: 'currency', total: 0, used: monthlySpend, remaining: monthlySpend },
+          quota: { type: 'currency', total: 0, used: this.platformCache.monthlySpend, remaining: this.platformCache.monthlySpend },
           resetAt: null
         });
       }
