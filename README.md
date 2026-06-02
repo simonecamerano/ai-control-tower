@@ -2,6 +2,8 @@
 
 A personal dashboard for monitoring quota usage across multiple AI providers in one place. The server exposes a thin JSON API backed by a connector layer; a single-page dashboard polls the API every 10 seconds and renders live health badges, quota progress bars, and a low-quota alert panel.
 
+![AI Control Tower dashboard](docs/screenshot.png)
+
 ---
 
 ## Disclaimer
