@@ -1,65 +1,61 @@
 # AI Control Tower
 
-A personal dashboard for monitoring quota usage across multiple AI providers in one place. The server exposes a thin JSON API backed by a connector layer; a single-page dashboard polls the API every 10 seconds and renders live health badges, quota progress bars, and a low-quota alert panel.
+> Personal dashboard for monitoring quota usage across multiple AI providers in real time — from a single interface, without switching tabs.
 
-![AI Control Tower dashboard](docs/screenshot.png)
+When you work with multiple AI providers simultaneously, quota management becomes a daily friction point. You hit a rate limit mid-session, switch to another model, forget which one was about to reset, and lose context. AI Control Tower solves this by exposing a unified live dashboard — provider health, quota progress bars, and low-quota alerts — polling every 10 seconds from a lightweight local server.
 
----
-
-## Disclaimer
-
-**This project is a personal tool built for educational and demonstration purposes only.**
-
-It does not perform any write operations, purchases, or actions on any provider platform. It only reads quota and usage data that the authenticated user is already entitled to see through their own accounts.
-
-Several connectors work by reading session credentials that are **already present on the user's own machine** — the same cookies and tokens the browser stores when you log in normally to a provider's website. No credential is extracted, generated, or shared in any automated way. The tool simply reuses what is already there, the same way a browser extension or DevTools session would.
-
-The project is not intended to:
-- Circumvent rate limits or paywalls
-- Violate any provider's Terms of Service
-- Access data belonging to other users
-- Automate actions or impersonate users
-
-If you use this project, you are responsible for ensuring your use complies with the terms of service of each provider you connect to.
+![AI Control Tower dashboard](./docs/screenshot.png)
 
 ---
 
-## Table of Contents
+## What It Monitors
 
-- [Architecture](#architecture)
-- [Registered connectors](#registered-connectors)
-- [API reference](#api-reference)
-- [Setup](#setup)
-- [Running the project](#running-the-project)
-- [Testing](#testing)
-- [Adding a new connector](#adding-a-new-connector)
+| Provider | What you see |
+|---|---|
+| **Claude** | Session quota (% used), 5h window reset time, optional API prepaid balance |
+| **GitHub Copilot** | Session usage from `github.com` cookie |
+| **DeepSeek** | API balance + optional monthly spend |
+| **Tavily** | Search credit usage from session cookie or API key |
+| **Codex CLI** | Auth token from `~/.codex/auth.json` + optional API balance |
+| **Antigravity (Codeium)** | Local language server process — no credential needed |
+
+Every connector reports a unified health status: `OK` · `WARNING` · `CRITICAL` · `BLOCKED`.
 
 ---
 
 ## Architecture
 
-### Fastify API server
-
-`src/index.ts` bootstraps a [Fastify](https://fastify.dev/) server that:
-
-1. Calls `initializeConnectors()` to register all provider connectors with the factory.
-2. Serves the static single-page dashboard from `public/` via `@fastify/static`.
-3. Registers the provider routes under `/v1/`.
-4. Exposes a `/health` liveness check.
-
-### Connector layer
-
-**`BaseConnector`** (`src/connectors/base.ts`) — abstract base class with an in-memory TTL cache. Subclasses implement one method:
-
-```ts
-protected abstract fetchMetricsRaw(): Promise<ProviderMetrics>;
+```
+Browser dashboard (SPA)
+        │ polls every 10s
+        ▼
+Fastify API server (src/index.ts)
+        │
+        ▼
+ConnectorFactory
+(static registry — resolved by provider name at runtime)
+        │
+        ├── ClaudeConnector
+        ├── CopilotConnector
+        ├── DeepSeekConnector
+        ├── TavilyConnector
+        ├── CodexConnector
+        └── AntigravityConnector
+              │
+              ▼
+        BaseConnector
+        (abstract + in-memory TTL cache)
+        ↓
+        fetchMetricsRaw() → ProviderMetrics
 ```
 
-**`ConnectorFactory`** (`src/connectors/factory.ts`) — static registry mapping provider names to connector instances. Registered once at startup, resolved by name at runtime.
+The dashboard is a dependency-free SPA (`public/index.html` + `app.js` + `style.css`). No framework, no build step — just fetch and render.
 
 ### Unified metrics schema
 
-```ts
+Every connector returns the same shape:
+
+```typescript
 interface ProviderMetrics {
   provider: string;
   status: 'active' | 'inactive' | 'error';
@@ -84,36 +80,28 @@ interface MetricQuota {
 }
 ```
 
-### Single-page dashboard
-
-`public/index.html` + `public/app.js` + `public/style.css` — a dependency-free SPA. On load it fetches provider data and the low-quota alert panel, then re-polls every 10 seconds.
+Adding a new provider means implementing one method — `fetchMetricsRaw()` — and registering the connector. The dashboard and API pick it up automatically.
 
 ---
 
-## Registered connectors
+## How Credentials Work
 
-| Provider | Auth method |
-|---|---|
-| `claude` | Session cookie from `claude.ai` + org ID. Optionally, session cookie from `platform.claude.com` + org ID for API prepaid balance. |
-| `copilot` | Session cookie from `github.com`. |
-| `deepseek` | API key (`/user/balance`). Optionally, platform bearer token for monthly spend. |
-| `tavily` | Session cookie from `app.tavily.com` (`appSession` value). Falls back to API key. |
-| `codex` | Auth token read from `~/.codex/auth.json` (written by the Codex CLI). Optionally, platform session token for API balance and monthly spend. |
-| `antigravity` | None — introspects the local Codeium language server process via `ps` and `lsof`. No credential needed. |
+No credential is extracted, generated, or shared. The connectors reuse what is already present on your machine after a normal browser login — the same cookies and tokens your browser stores, the same way a DevTools session or browser extension would.
 
----
+**To retrieve session credentials:**
+1. Log in to the provider's website
+2. Open DevTools → Network → reload
+3. Click any authenticated request → copy the `Cookie` or `Authorization` header
 
-## API reference
-
-### `GET /health`
-
-Returns `{ "status": "ok" }`.
+Every variable in `.env` is optional — leaving one blank causes that connector to report `inactive` instead of erroring.
 
 ---
+
+## API
 
 ### `GET /v1/providers`
 
-Returns a health summary map for every registered provider.
+Health summary for all registered providers:
 
 ```json
 {
@@ -126,19 +114,13 @@ Returns a health summary map for every registered provider.
 }
 ```
 
-`GET /v1/status` is an alias.
-
----
-
 ### `GET /v1/providers/:name`
 
-Returns the full `ProviderMetrics` object for a single provider. Returns `404` if unknown.
-
----
+Full `ProviderMetrics` object for a single provider. Returns `404` if unknown.
 
 ### `GET /v1/models/best-match`
 
-Returns the two coding-assistant models with the least quota remaining (most depleted first). Excludes non-coding providers (e.g. Tavily) and informational-only metrics (`currency` type).
+Returns the two coding-assistant models with the most depleted quota — useful for automatically routing tasks to the model with the most headroom. Excludes non-coding providers and informational-only metrics.
 
 ```json
 {
@@ -156,44 +138,23 @@ Returns the two coding-assistant models with the least quota remaining (most dep
 }
 ```
 
-Either field may be `null` if no suitable candidates exist.
+### `GET /health`
+
+Liveness check — returns `{ "status": "ok" }`.
 
 ---
 
 ## Setup
 
-### Prerequisites
-
-- **Node.js** 20+
-- **npm** 10+
-
-### Installation
-
 ```bash
-git clone <repo-url>
+git clone https://github.com/simonecamerano/ai-control-tower.git
 cd ai-control-tower
 npm install
 cp .env.example .env
-# fill in .env with your credentials
+# Fill in credentials for the providers you use
 ```
 
-### Environment configuration
-
-See `.env.example` for the full list of variables. Every variable is optional — leaving one blank causes that connector to report `inactive` rather than erroring.
-
-**How to get session credentials**
-
-Each provider's session credentials are already stored in your browser after a normal login. To retrieve them:
-
-1. Log in to the provider's website.
-2. Open DevTools → Network tab → reload the page.
-3. Click any authenticated request and copy the `Cookie` request header (or the `Authorization` header for bearer tokens).
-
-The credentials stay on your machine and are only used to read your own quota data.
-
----
-
-## Running the project
+### Running
 
 | Command | Description |
 |---|---|
@@ -202,24 +163,21 @@ The credentials stay on your machine and are only used to read your own quota da
 | `npm run build` | Compile TypeScript to `dist/` |
 | `node dist/index.js` | Run compiled production build |
 
-The server listens on `http://localhost:3000` by default.
+Server listens on `http://localhost:3000` by default.
 
----
-
-## Testing
+### Testing
 
 ```bash
-npm test            # run suite once
-npm run test:watch  # watch mode
+npm test             # run suite once
+npm run test:watch   # watch mode
 ```
 
 ---
 
-## Adding a new connector
+## Adding a New Connector
 
-1. Create `src/connectors/myprovider.ts` extending `BaseConnector`:
-
-```ts
+```typescript
+// 1. Create src/connectors/myprovider.ts
 export class MyProviderConnector extends BaseConnector {
   constructor() { super('myprovider'); }
 
@@ -229,8 +187,57 @@ export class MyProviderConnector extends BaseConnector {
 }
 ```
 
-2. Register in `src/connectors/index.ts`.
-3. Add env vars to `src/config.ts` and `.env.example`.
-4. Write `src/connectors/myprovider.test.ts`.
+Then register in `src/connectors/index.ts`, add env vars to `src/config.ts` and `.env.example`, and write `src/connectors/myprovider.test.ts`. The dashboard and API pick up the new provider automatically on next restart.
 
-The dashboard and API pick up the new provider automatically on next restart.
+---
+
+## Project Structure
+
+```
+ai-control-tower/
+├── src/
+│   ├── index.ts                    Fastify server entry point
+│   ├── config.ts                   Environment variable loading
+│   └── connectors/
+│       ├── base.ts                 Abstract base + TTL cache
+│       ├── factory.ts              Static connector registry
+│       ├── index.ts                Connector registration
+│       ├── claude.ts
+│       ├── copilot.ts
+│       ├── deepseek.ts
+│       ├── tavily.ts
+│       ├── codex.ts
+│       └── antigravity.ts
+├── public/
+│   ├── index.html                  Dashboard SPA
+│   ├── app.js                      Polling + render logic
+│   └── style.css
+├── docs/
+│   └── screenshot.png
+├── .contextforge/                  Project memory layer (ContextForge)
+├── .env.example
+├── launch.sh
+└── roadmap.md
+```
+
+---
+
+## Disclaimer
+
+This project is a personal tool built for educational and demonstration purposes. It performs no write operations, purchases, or actions on any provider platform — only reads quota and usage data that the authenticated user is already entitled to see through their own accounts. If you use this project, you are responsible for ensuring your use complies with the terms of service of each provider you connect to.
+
+---
+
+## Author
+
+**Simone Camerano** — AI workflow engineer and full stack developer.
+
+- 🌐 [simonecamerano.dev](https://simonecamerano.dev)
+- 💼 [linkedin.com/in/simone-camerano](https://linkedin.com/in/simone-camerano)
+- 🐙 [github.com/simonecamerano](https://github.com/simonecamerano)
+
+---
+
+## License
+
+MIT
