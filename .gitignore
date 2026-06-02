@@ -2,5 +2,6 @@ node_modules/
 dist/
 .env
 .contextforge/local/
+.claude/
 *.log
 .DS_Store
