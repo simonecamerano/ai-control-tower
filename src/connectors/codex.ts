@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { BaseConnector } from './base';
 import { ProviderMetrics, HealthStatus, ModelMetrics } from '../types';
-import { config } from '../config';
 
 /**
  * Connector for OpenAI Codex (via the ChatGPT WHAM usage endpoint).
@@ -11,16 +10,11 @@ import { config } from '../config';
  * the Codex CLI. If the file is absent or lacks an access token, the connector
  * reports `inactive`. The connector tracks two rate-limit windows
  * ("primary" and "secondary") that correspond to short-term burst and
- * longer-term rolling quotas.
+ * longer-term rolling quotas. The same response also carries a `credits`
+ * object when the account has pay-as-you-go API credits (absent for
+ * subscription-only ChatGPT Plus/Pro plans).
  */
-interface PlatformCache {
-  balance: { remaining: number; resetAt: string | null } | null;
-  monthlySpend: number | null;
-}
-
 export class CodexConnector extends BaseConnector {
-  private platformCache: PlatformCache = { balance: null, monthlySpend: null };
-
   constructor() {
     super('codex', 60000);
   }
@@ -69,23 +63,7 @@ export class CodexConnector extends BaseConnector {
         headers['ChatGPT-Account-Id'] = accountId;
       }
 
-      const platformHeaders = config.CODEX_SESSION_TOKEN && config.CODEX_ORG_ID
-        ? { 'Authorization': `Bearer ${config.CODEX_SESSION_TOKEN}`, 'openai-organization': config.CODEX_ORG_ID }
-        : null;
-
-      const now_date = new Date();
-      const monthStart = `${now_date.getFullYear()}-${String(now_date.getMonth() + 1).padStart(2, '0')}-01`;
-      const tomorrow = new Date(now_date.getTime() + 86400000).toISOString().slice(0, 10);
-
-      const [response, creditsRes, usageRes] = await Promise.all([
-        fetch('https://chatgpt.com/backend-api/wham/usage', { headers }),
-        platformHeaders
-          ? fetch('https://api.openai.com/v1/dashboard/billing/credit_grants', { headers: platformHeaders })
-          : Promise.resolve(null),
-        platformHeaders
-          ? fetch(`https://api.openai.com/v1/dashboard/billing/usage?start_date=${monthStart}&end_date=${tomorrow}`, { headers: platformHeaders })
-          : Promise.resolve(null)
-      ]);
+      const response = await fetch('https://chatgpt.com/backend-api/wham/usage', { headers });
 
       if (!response.ok) {
         return {
@@ -149,39 +127,16 @@ export class CodexConnector extends BaseConnector {
         });
       }
 
-      // API credit balance — update cache on success, fall back to last known value on failure
-      if (creditsRes?.ok) {
-        const creditsData = await creditsRes.json();
-        if (typeof creditsData.total_available === 'number') {
-          const expiresAt = creditsData.grants?.data?.[0]?.expires_at
-            ? new Date(creditsData.grants.data[0].expires_at * 1000).toISOString()
-            : null;
-          this.platformCache.balance = { remaining: creditsData.total_available, resetAt: expiresAt };
-        }
-      }
-      if (this.platformCache.balance !== null) {
+      // Pay-as-you-go API credit balance, when present on the account. Absent
+      // for subscription-only plans (e.g. ChatGPT Plus), so the model is
+      // omitted entirely rather than shown as zero.
+      const credits = data?.credits;
+      if (credits?.has_credits) {
+        const balance = parseFloat(credits.balance ?? '0');
         models.push({
           modelId: 'codex-balance',
           modelName: 'API Balance',
-          quota: { type: 'currency', total: 0, used: 0, remaining: this.platformCache.balance.remaining },
-          resetAt: this.platformCache.balance.resetAt
-        });
-      }
-
-      // Monthly spend — costs are in USD cents, divide by 100
-      if (usageRes?.ok) {
-        const usageData = await usageRes.json();
-        const dailyCosts: { line_items: { cost: number }[] }[] = usageData?.daily_costs ?? [];
-        const monthlySpend = dailyCosts
-          .flatMap(d => d.line_items ?? [])
-          .reduce((sum, item) => sum + (item.cost ?? 0), 0) / 100;
-        this.platformCache.monthlySpend = monthlySpend;
-      }
-      if (this.platformCache.monthlySpend !== null) {
-        models.push({
-          modelId: 'codex-monthly',
-          modelName: 'Monthly Spend',
-          quota: { type: 'currency', total: 0, used: this.platformCache.monthlySpend, remaining: this.platformCache.monthlySpend },
+          quota: { type: 'currency', total: 0, used: 0, remaining: balance },
           resetAt: null
         });
       }

@@ -1,7 +1,6 @@
-import { expect, test, describe, vi, afterEach, beforeEach } from 'vitest';
+import { expect, test, describe, vi, afterEach } from 'vitest';
 import * as fs from 'fs';
 import { CodexConnector } from './codex';
-import { config } from '../config';
 
 vi.mock('fs', async (importOriginal) => {
   const actual = await importOriginal<typeof import('fs')>();
@@ -14,17 +13,8 @@ vi.mock('fs', async (importOriginal) => {
 
 describe('CodexConnector', () => {
   const originalFetch = global.fetch;
-  const originalSessionToken = config.CODEX_SESSION_TOKEN;
-  const originalOrgId = config.CODEX_ORG_ID;
-
-  beforeEach(() => {
-    config.CODEX_SESSION_TOKEN = '';
-    config.CODEX_ORG_ID = '';
-  });
 
   afterEach(() => {
-    config.CODEX_SESSION_TOKEN = originalSessionToken;
-    config.CODEX_ORG_ID = originalOrgId;
     global.fetch = originalFetch;
     vi.restoreAllMocks();
   });
@@ -91,6 +81,55 @@ describe('CodexConnector', () => {
     expect(result.models[1].quota.remaining).toBe(80);
     expect(result.models[1].resetAt).toBe(new Date(1780500000 * 1000).toISOString());
     expect(result.resetAt).toBe(new Date(1780000000 * 1000).toISOString());
+  });
+
+  test('should add API Balance model when credits.has_credits is true', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFileSync).mockReturnValue(
+      JSON.stringify({ tokens: { access_token: 'test-token' } })
+    );
+
+    const mockResponse = {
+      rate_limit: {
+        allowed: true,
+        limit_reached: false,
+        primary_window: { used_percent: 5, reset_at: 1780000000 }
+      },
+      credits: { has_credits: true, balance: '12.34' }
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+    const connector = new CodexConnector();
+    const result = await connector.fetchMetrics();
+
+    const balance = result.models.find(m => m.modelId === 'codex-balance');
+    expect(balance?.modelName).toBe('API Balance');
+    expect(balance?.quota.type).toBe('currency');
+    expect(balance?.quota.remaining).toBeCloseTo(12.34);
+  });
+
+  test('should omit API Balance model when credits.has_credits is false (subscription plans)', async () => {
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readFileSync).mockReturnValue(
+      JSON.stringify({ tokens: { access_token: 'test-token' } })
+    );
+
+    const mockResponse = {
+      rate_limit: {
+        allowed: true,
+        limit_reached: false,
+        primary_window: { used_percent: 5, reset_at: 1780000000 }
+      },
+      credits: { has_credits: false, balance: '0' }
+    };
+
+    global.fetch = vi.fn().mockResolvedValue({ ok: true, json: async () => mockResponse });
+
+    const connector = new CodexConnector();
+    const result = await connector.fetchMetrics();
+
+    expect(result.models.find(m => m.modelId === 'codex-balance')).toBeUndefined();
   });
 
   test('should return critical health if used_percent >= 90', async () => {

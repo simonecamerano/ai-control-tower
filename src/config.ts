@@ -12,8 +12,6 @@ export const config = {
   TAVILY_API_KEY: process.env.TAVILY_API_KEY || '',
   TAVILY_SESSION_COOKIE: process.env.TAVILY_SESSION_COOKIE || '',
   CODEX_API_KEY: process.env.CODEX_API_KEY || '',
-  CODEX_SESSION_TOKEN: process.env.CODEX_SESSION_TOKEN || '',
-  CODEX_ORG_ID: process.env.CODEX_ORG_ID || '',
   CLAUDE_ORG_ID: process.env.CLAUDE_ORG_ID || '',
   CLAUDE_SESSION_COOKIE: process.env.CLAUDE_SESSION_COOKIE || '',
   CLAUDE_PLATFORM_ORG_ID: process.env.CLAUDE_PLATFORM_ORG_ID || '',
