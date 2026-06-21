@@ -15,7 +15,7 @@ describe('MockConnector', () => {
   });
 
   test('successfully generates metrics for known mock providers', async () => {
-    const knownProviders = ['claude', 'deepseek', 'copilot', 'tavily', 'codex'];
+    const knownProviders = ['claude', 'deepseek', 'tavily', 'codex'];
     for (const provider of knownProviders) {
       const connector = new MockConnector(provider);
       const metrics = await connector.fetchMetrics();

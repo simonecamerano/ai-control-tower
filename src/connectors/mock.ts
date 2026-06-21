@@ -31,23 +31,6 @@ export class MockConnector extends BaseConnector {
         };
         break;
       }
-      case 'copilot': {
-        const total = 500;
-        const used = Math.floor(Math.random() * 50) + 100; // 100-149
-        const remaining = total - used;
-        
-        metrics = {
-          provider,
-          status: 'active',
-          health: 'OK',
-          models: [
-            { modelId: 'copilot-chat', modelName: 'Copilot Chat', quota: { type: 'requests', total, used, remaining }, resetAt: null }
-          ],
-          resetAt: null,
-          lastUpdatedAt: currentTimestamp
-        };
-        break;
-      }
       case 'deepseek': {
         const globalTotal = 15;
         const globalUsed = Number((Math.random() * 5 + 5).toFixed(2)); // 5-9.99

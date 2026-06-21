@@ -13,7 +13,6 @@ When you work with multiple AI providers simultaneously, quota management become
 | Provider | What you see |
 |---|---|
 | **Claude** | Session quota (% used), 5h window reset time, optional API prepaid balance |
-| **GitHub Copilot** | Session usage from `github.com` cookie |
 | **DeepSeek** | API balance + optional monthly spend |
 | **Tavily** | Search credit usage from session cookie or API key |
 | **Codex CLI** | Auth token from `~/.codex/auth.json` + optional API balance |
@@ -36,7 +35,6 @@ ConnectorFactory
 (static registry — resolved by provider name at runtime)
         │
         ├── ClaudeConnector
-        ├── CopilotConnector
         ├── DeepSeekConnector
         ├── TavilyConnector
         ├── CodexConnector
@@ -106,7 +104,6 @@ Health summary for all registered providers:
 ```json
 {
   "claude": "OK",
-  "copilot": "WARNING",
   "deepseek": "OK",
   "tavily": "OK",
   "codex": "CRITICAL",
@@ -203,7 +200,6 @@ ai-control-tower/
 │       ├── factory.ts              Static connector registry
 │       ├── index.ts                Connector registration
 │       ├── claude.ts
-│       ├── copilot.ts
 │       ├── deepseek.ts
 │       ├── tavily.ts
 │       ├── codex.ts
